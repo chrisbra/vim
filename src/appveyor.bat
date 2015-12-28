@@ -38,6 +38,9 @@ pushd ..\ruby
 call win32\configure.bat
 nmake .config.h.time
 popd
+:: Install target for po files
+curl -L http://cache.gmane.org//gmane/editors/vim/devel/53942-001.bin -o po_install.patch
+git apply --check po_install.patch && git apply po_install.patch
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
@@ -71,6 +74,9 @@ pushd ..\ruby
 call win32\configure.bat
 nmake .config.h.time
 popd
+:: Install target for po files
+curl -L http://cache.gmane.org//gmane/editors/vim/devel/53942-001.bin -o po_install.patch
+git apply --check po_install.patch && git apply po_install.patch
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
