@@ -39,8 +39,8 @@ call win32\configure.bat
 nmake .config.h.time
 popd
 :: Install target for po files
-curl -L https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0 -o po_install.patch
-git apply --check po_install.patch && git apply po_install.patch && git commit -a -m 'applied po patch'
+curl -L "https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0" -o po_install.patch
+git apply --check po_install.patch && git apply po_install.patch
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
@@ -75,8 +75,8 @@ call win32\configure.bat
 nmake .config.h.time
 popd
 :: Install target for po files
-curl -L https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0 -o po_install.patch
-git apply --check po_install.patch && git apply po_install.patch && git commit -a -m 'applied po patch'
+curl -L "https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0" -o po_install.patch
+git apply --check po_install.patch && git apply po_install.patch
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
