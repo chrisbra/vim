@@ -26,7 +26,7 @@ appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
 :: Need a patch for Perl > 5.20 and VS <= 2012 
 curl -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
-git apply --check && git am perl_vc2012.patch
+git apply --check vc2012.patch && git am perl_vc2012.patch
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-ix86-threaded.exe -FileName tcl.exe
 start /wait tcl.exe --directory C:\Tcl
@@ -59,7 +59,7 @@ appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
 :: Need a patch for Perl > 5.20 and VS <= 2012 
 curl -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
-git apply --check && git am perl_vc2012.patch
+git apply --check vc2012.patch && git am perl_vc2012.patch
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-x86_64-threaded.exe -FileName tcl.exe
 start /wait tcl.exe --directory C:\Tcl
