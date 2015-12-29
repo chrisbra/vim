@@ -38,9 +38,6 @@ pushd ..\ruby
 call win32\configure.bat
 nmake .config.h.time
 popd
-:: Install target for po files
-curl -L "https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0" -o po_install.patch
-git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
@@ -80,9 +77,6 @@ pushd ..\ruby
 call win32\configure.bat
 nmake .config.h.time
 popd
-:: Install target for po files
-curl -L "https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0" -o po_install.patch
-git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
 :: TODO: Make this work with 64bit
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
