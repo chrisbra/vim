@@ -44,7 +44,9 @@ git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
+curl -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip?r=&ts=1451397989&use_mirror=netix" -o gettext-runtime-0.13.1.zip
 7z x diffutils*.zip -oc:\gnuwin32\
+7z x gettext-runtime*.zip -oc:\gettext\
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
@@ -82,9 +84,12 @@ popd
 curl -L "https://groups.google.com/group/vim_dev/attach/b07a21d5edfe9/update-po-makefiles.patch?part=0.1&authuser=0" -o po_install.patch
 git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
+:: TODO: Make this work with 64bit
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
+curl -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip?r=&ts=1451397989&use_mirror=netix" -o gettext-runtime-0.13.1.zip
 7z x diffutils*.zip -oc:\gnuwin32\
+7z x gettext-runtime*.zip -oc:\gettext\
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
