@@ -44,7 +44,7 @@ git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
-7x x diffutils*.zip -oc:\gnuwin32\
+7z x diffutils*.zip -oc:\gnuwin32\
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
@@ -84,7 +84,7 @@ git apply --check po_install.patch && git apply po_install.patch
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
 curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
-7x x diffutils*.zip -oc:\gnuwin32\
+7z x diffutils*.zip -oc:\gnuwin32\
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
