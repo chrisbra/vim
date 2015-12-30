@@ -18,14 +18,14 @@ exit 1
 reg copy HKLM\SOFTWARE\Python\PythonCore\2.7 HKLM\SOFTWARE\Python\PythonCore\2.7-32 /s /reg:32
 :: Lua
 :: Appveyor command doesn't seem to work well when downloading from sf.net.
-curl -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%20Libraries/Dynamic/lua-5.3.2_Win32_dllw4_lib.zip" -o lua.zip
+curl -f -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%20Libraries/Dynamic/lua-5.3.2_Win32_dllw4_lib.zip" -o lua.zip
 7z x lua.zip -oC:\Lua > nul
 :: Perl
 appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.0.2200/ActivePerl-5.22.0.2200-MSWin32-x86-64int-299195.zip -FileName perl.zip
 7z x perl.zip -oC:\ > nul
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
 :: Need a patch for Perl > 5.20 and VS <= 2012 
-curl -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
+curl -f -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
 git apply --check perl_vc2012.patch && git apply perl_vc2012.patch
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-ix86-threaded.exe -FileName tcl.exe
@@ -39,9 +39,9 @@ call win32\configure.bat
 nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
-curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
-curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
-curl -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip?r=&ts=1451397989&use_mirror=netix" -o gettext-runtime-0.13.1.zip
+curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip" -o diffutils-2.8.7-1.zip
+curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip" -o diffutils-dep.zip
+curl -f -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip" -o gettext-runtime-0.13.1.zip
 7z x diffutils*.zip -oc:\gnuwin32\
 7z x gettext-runtime*.zip -oc:\gettext\
 
@@ -57,14 +57,14 @@ goto :eof
 reg copy HKLM\SOFTWARE\Python\PythonCore\2.7 HKLM\SOFTWARE\Python\PythonCore\2.7-32 /s /reg:64
 :: Lua
 :: Appveyor command doesn't seem to work well when downloading from sf.net.
-curl -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%20Libraries/Dynamic/lua-5.3.2_Win64_dllw4_lib.zip" -o lua.zip
+curl -f -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%20Libraries/Dynamic/lua-5.3.2_Win64_dllw4_lib.zip" -o lua.zip
 7z x lua.zip -oC:\Lua > nul
 :: Perl
 appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.0.2200/ActivePerl-5.22.0.2200-MSWin32-x64-299195.zip -FileName perl.zip
 7z x perl.zip -oC:\ > nul
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
 :: Need a patch for Perl > 5.20 and VS <= 2012 
-curl -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
+curl -f -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
 git apply --check perl_vc2012.patch && git apply perl_vc2012.patch
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-x86_64-threaded.exe -FileName tcl.exe
@@ -79,9 +79,9 @@ nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
 :: TODO: Make this work with 64bit
-curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394326&use_mirror=netix" -o diffutils-2.8.7-1.zip
-curl -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip?r=http%3A%2F%2Fgnuwin32.sourceforge.net%2Fpackages%2Fdiffutils.htm&ts=1451394327&use_mirror=netcologne" -o diffutils-dep.zip
-curl -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip?r=&ts=1451397989&use_mirror=netix" -o gettext-runtime-0.13.1.zip
+curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip" -o diffutils-2.8.7-1.zip
+curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip" -o diffutils-dep.zip
+curl -f -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip" -o gettext-runtime-0.13.1.zip
 7z x diffutils*.zip -oc:\gnuwin32\
 7z x gettext-runtime*.zip -oc:\gettext\
 
