@@ -41,10 +41,10 @@ popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip" -o diffutils-2.8.7-1.zip
 curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip" -o diffutils-dep.zip
-curl -f -L "http://downloads.sourceforge.net/project/gettext/gettext-win32/0.13.1/gettext-runtime-0.13.1.bin.woe32.zip" -o gettext-runtime-0.13.1.zip
+curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-32.exe" -o gettext.exe
 7z x diffutils*.zip -oc:\gnuwin32\
-7z x gettext-runtime*.zip -oc:\gettext\
-copy c:\gettext\bin\intl.dll c:\gettext\bin\libintl.dll
+start /wait gettext.exe /verysilent /dir=c:\gettext
+copy c:\gettext\libintl-8.dll c:\gettext\libintl.dll
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
@@ -85,9 +85,7 @@ curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/
 curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-64.exe" -o gettext.exe
 7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
-mkdir c:\gettext\bin
-copy c:\gettext\libintl-8.dll c:\gettext\bin\libintl.dll
-copy c:\gettext\libiconv-2.dll c:\gettext\bin\libiconv2.dll
+copy c:\gettext\libintl-8.dll c:\gettext\libintl.dll
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin

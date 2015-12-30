@@ -35,8 +35,8 @@ after_build:
   - copy /Y GvimExt\*.inf       ..\runtime\GvimExt\
   - copy /Y GvimExt\*.reg       ..\runtime\GvimExt\
   - copy /Y c:\gnuwin32\bin\diff.exe ..\runtime\GvimExt\
-  - copy /Y c:\gnuwin32\bin\libiconv*.dll ..\runtime\
-  - copy /Y c:\gettext\bin\libintl.dll ..\runtime\libintl.dll
+  - copy /Y c:\gettext\libiconv*.dll ..\runtime\
+  - copy /Y c:\gettext\libintl.dll ..\runtime\
   - 7z a ..\gvim_%ARCH%.zip ..\runtime\*
 
 test_script:
