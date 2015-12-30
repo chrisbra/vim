@@ -37,6 +37,8 @@ after_build:
   - copy /Y c:\gnuwin32\bin\diff.exe ..\runtime\GvimExt\
   - copy /Y c:\gettext\libiconv*.dll ..\runtime\
   - copy /Y c:\gettext\libintl.dll ..\runtime\
+  # libwinpthread is needed on Win64 for localizing messages
+  - if exist c:\gettext\libwinpthread-1.dll copy /Y c:\gettext\libwinpthread-1.dll ..\runtime\
   - 7z a ..\gvim_%ARCH%.zip ..\runtime\*
 
 test_script:

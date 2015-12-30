@@ -86,6 +86,8 @@ curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v
 7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
 copy c:\gettext\libintl-8.dll c:\gettext\libintl.dll
+:: libwinpthread is needed on Win64 for localizing messages
+::copy c:\gettext\libwinpthread-1.dll ..\runtime
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
