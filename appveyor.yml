@@ -1,6 +1,7 @@
 version: "{build}"
 
-#skip_tags: true
+# comment out this line, once this is merged to main Vim
+skip_tags: true
 
 environment:
   matrix:
@@ -52,12 +53,15 @@ artifacts:
 
 deploy:
   - provider: GitHub
-    release: vim-$(APPVEYOR_REPO_TAG_NAME)
+    release: vim-$(APPVEYOR_REPO_COMMIT)
+    # uncomment next lines, when this is merged to Vim mainline
+    #release: vim-$(APPVEYOR_REPO_TAG_NAME)
     description: 'Nightly Vim Windows build snapshots'
     auth_token:
       secure: kH0D/3t+1Mc8OChKhe+voKlMO0aMwnlUr64QoZOJC6BaVwy+Us3ZHq9Oo+aBzjYc
     artifact: /gVim/
     draft: false
     prerelease: false
-    on:
-      appveyor_repo_tag: true
+#   uncomment the following lines, once this is merged to Vim main repository:
+#    on:
+#      appveyor_repo_tag: true
