@@ -39,8 +39,8 @@ call win32\configure.bat
 nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
-curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip" -o diffutils-2.8.7-1.zip
-curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip" -o diffutils-dep.zip
+curl -f -L -O ftp://ftp.vim.org/pub/vim/pc/gvim74.exe
+7z e gvim74.exe $0\diff.exe -o..
 curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-32.exe" -o gettext.exe
 7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
@@ -80,8 +80,8 @@ nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
 :: TODO: Make this work with 64bit
-curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-bin.zip" -o diffutils-2.8.7-1.zip
-curl -f -L "http://downloads.sourceforge.net/project/gnuwin32/diffutils/2.8.7-1/diffutils-2.8.7-1-dep.zip" -o diffutils-dep.zip
+curl -f -L -O ftp://ftp.vim.org/pub/vim/pc/gvim74.exe
+7z e gvim74.exe $0\diff.exe -o..
 curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-64.exe" -o gettext.exe
 7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
