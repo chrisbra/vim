@@ -11,6 +11,8 @@ environment:
 matrix:
   fast_finish: true
 
+shallow_clone: true
+
 build:
   verbosity: minimal
 
