@@ -39,6 +39,7 @@ start /wait tcl.exe --directory C:\Tcl
 git clone https://github.com/ruby/ruby.git -b ruby_2_2 --depth 1 -q ../ruby
 pushd ..\ruby
 call win32\configure.bat
+echo on
 nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
@@ -82,6 +83,7 @@ start /wait tcl.exe --directory C:\Tcl
 git clone https://github.com/ruby/ruby.git -b ruby_2_2 --depth 1 -q ../ruby
 pushd ..\ruby
 call win32\configure.bat
+echo on
 nmake .config.h.time
 popd
 :: Install binary diff.exe and libintl.dll and iconv.dll
