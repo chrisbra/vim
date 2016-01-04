@@ -46,6 +46,7 @@
 
 #include "vim.h"
 
+#undef DEBUG
 #ifdef DEBUG
 /* show/save debugging data when BT engine is used */
 # define BT_REGEXP_DUMP

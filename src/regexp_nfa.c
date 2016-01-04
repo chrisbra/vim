@@ -21,6 +21,7 @@
  * Do disable all of this when compiling Vim for debugging, undefine DEBUG in
  * regexp.c
  */
+#undef DEBUG
 #ifdef DEBUG
 # define NFA_REGEXP_ERROR_LOG	"nfa_regexp_error.log"
 # define ENABLE_LOG
