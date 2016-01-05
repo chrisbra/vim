@@ -718,6 +718,10 @@ can also get to them with the buffer list commands, like ":bnext".
 			Also see |:tabdo|, |:argdo|, |:bufdo|, |:cdo|, |:ldo|,
 			|:cfdo| and |:lfdo|
 
+:[range]windo <restore> {cmd}
+			Like *:windo* but restore cursor to the window where it
+			was started.
+
 							*:bufdo*
 :[range]bufdo[!] {cmd}	Execute {cmd} in each buffer in the buffer list or if
 			[range] is given only for buffers for which their
@@ -747,11 +751,15 @@ can also get to them with the buffer list commands, like ":bnext".
 			Also see |:tabdo|, |:argdo|, |:windo|, |:cdo|, |:ldo|,
 			|:cfdo| and |:lfdo|
 
+:[range]bufdo[!] <restore> {cmd}
+			Like *:bufdo* but restore the buffer afterwards.
+
 Examples: >
 
-	:windo set nolist nofoldcolumn | normal zn
+	:windo <restore> set nolist nofoldcolumn | normal zn
 
-This resets the 'list' option and disables folding in all windows. >
+This resets the 'list' option and disables folding in all windows, cursor will
+be in the same window from which this command was called. >
 
 	:bufdo set fileencoding= | update
 

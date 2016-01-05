@@ -873,6 +873,11 @@ USING THE ARGUMENT LIST
 			Also see |:windo|, |:tabdo|, |:bufdo|, |:cdo|, |:ldo|,
 			|:cfdo| and |:lfdo|
 
+						*:argdo-<restore>*
+:[range]argdo[!] <restore> {cmd}
+			Like |:argdo| but restore position in the argument
+			list afterwards.
+
 Example: >
 	:args *.c
 	:argdo set ff=unix | update

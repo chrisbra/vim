@@ -301,7 +301,8 @@ use this code: >
 
 EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
 							*:cdo*
-:cdo[!] {cmd}		Execute {cmd} in each valid entry in the quickfix list.
+:cdo[!] [<restore>] {cmd}
+			Execute {cmd} in each valid entry in the quickfix list.
 			It works like doing this: >
 				:cfirst
 				:{cmd}
@@ -320,6 +321,10 @@ EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
 				:10,$cdo cmd
 <			To skip entries 1 to 9.
 
+			If the <restore> argument is given, the quickfix
+			position will be restored after the {cmd} has been
+			finished.
+
 			Note: While this command is executing, the Syntax
 			autocommand event is disabled by adding it to
 			'eventignore'.  This considerably speeds up editing
@@ -330,7 +335,8 @@ EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
 			|:ldo|, |:cfdo| and |:lfdo|.
 
 							*:cfdo*
-:cfdo[!] {cmd}		Execute {cmd} in each file in the quickfix list.
+:cfdo[!] [<restore>] {cmd}
+			Execute {cmd} in each file in the quickfix list.
 			It works like doing this: >
 				:cfirst
 				:{cmd}
@@ -342,7 +348,8 @@ EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
 			|+listcmds| feature}
 
 							*:ldo*
-:ld[o][!] {cmd}		Execute {cmd} in each valid entry in the location list
+:ld[o][!] [<restore>] {cmd}
+			Execute {cmd} in each valid entry in the location list
 			for the current window.
 			It works like doing this: >
 				:lfirst
@@ -356,7 +363,8 @@ EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
 			|+listcmds| feature}
 
 							*:lfdo*
-:lfdo[!] {cmd}		Execute {cmd} in each file in the location list for
+:lfdo[!] [<restore>] {cmd}
+			Execute {cmd} in each file in the location list for
 			the current window.
 			It works like doing this: >
 				:lfirst

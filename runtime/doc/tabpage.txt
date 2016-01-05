@@ -251,6 +251,10 @@ LOOPING OVER TAB PAGES:
 		Also see |:windo|, |:argdo|, |:bufdo|, |:cdo|, |:ldo|, |:cfdo|
 		and |:lfdo|
 
+:[range]tabd[o] <restore> {cmd}
+		Like |:tabdo| but restore cursor to the tabpage from which
+		this command was called.
+
 ==============================================================================
 3. Other items						*tab-page-other*
 
