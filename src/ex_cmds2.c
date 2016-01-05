@@ -2439,6 +2439,17 @@ ex_listdo(eap)
     exarg_T	*eap;
 {
     int		i;
+    int		restore = FALSE;
+    struct	st_restore
+    {
+	int	i;
+	buf_T	*curbuf;
+#ifdef FEAT_WINDOWS
+	win_T	*curwin;
+	tabpage_T   *curtab;
+#endif
+    } rst;
+
 #ifdef FEAT_WINDOWS
     win_T	*wp;
     tabpage_T	*tp;
@@ -2471,6 +2482,26 @@ ex_listdo(eap)
 #ifdef FEAT_CLIPBOARD
     start_global_changes();
 #endif
+
+    skipwhite(eap->arg);
+    if (STRNCMP(eap->arg, "<restore>", 9) == 0)
+    {
+	eap->arg = skipwhite(eap->arg + 9);
+	restore = TRUE;
+	rst.i = 0;
+	rst.curbuf = curbuf;
+#ifdef FEAT_WINDOWS
+	rst.curwin = curwin;
+	rst.curtab = curtab;
+#endif
+	if (eap->cmdidx == CMD_argdo)
+	    rst.i = curwin->w_arg_idx;
+#ifdef FEAT_QUICKFIX
+	if (eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo
+		|| eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo)
+	    rst.i = qf_get_cur_idx(eap);
+#endif
+    }
 
     if (eap->cmdidx == CMD_windo
 	    || eap->cmdidx == CMD_tabdo
@@ -2663,6 +2694,33 @@ ex_listdo(eap)
 	}
 	listcmd_busy = FALSE;
     }
+
+    if (restore)
+    {
+	if (eap->cmdidx == CMD_bufdo && buf_valid(rst.curbuf))
+		goto_buffer(eap, DOBUF_FIRST, FORWARD, rst.curbuf->b_fnum);
+#ifdef FEAT_WINDOWS
+	else if (eap->cmdidx == CMD_windo && win_valid(rst.curwin))
+		win_goto(rst.curwin);
+	else if (eap->cmdidx == CMD_tabdo && valid_tabpage(tp))
+		goto_tabpage_tp(rst.curtab, TRUE, TRUE);
+#endif
+	else if (eap->cmdidx == CMD_argdo)
+	{
+	    if (curwin->w_arg_idx != rst.i || !editing_arg_idx(rst.curwin))
+		do_argfile(eap, rst.i);
+	}
+#ifdef FEAT_QUICKFIX
+	else if (eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo
+		|| eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo)
+	{
+	    eap->addr_count = rst.i;
+	    eap->line1 = rst.i;
+	    ex_cc(eap);
+	}
+#endif
+    }
+
 
 #if defined(FEAT_AUTOCMD) && defined(FEAT_SYN_HL)
     if (save_ei != NULL)
