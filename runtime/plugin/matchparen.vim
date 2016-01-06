@@ -186,9 +186,9 @@ function! s:Highlight_Matching_Pair()
 endfunction
 
 " Define commands that will disable and enable the plugin.
-command! NoMatchParen windo silent! call matchdelete(3) | unlet! g:loaded_matchparen |
+command! NoMatchParen windo <restore> silent! call matchdelete(3) | unlet! g:loaded_matchparen |
 	  \ au! matchparen
-command! DoMatchParen runtime plugin/matchparen.vim | windo doau CursorMoved
+command! DoMatchParen runtime plugin/matchparen.vim | windo <restore> doau CursorMoved
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
