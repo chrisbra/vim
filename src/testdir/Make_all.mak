@@ -176,7 +176,8 @@ NEW_TESTS = test_assert.res \
 	    test_cdo.res \
 	    test_quickfix.res \
 	    test_viml.res \
-	    test_alot.res
+	    test_alot.res \
+	    test_listcmds.res
 
 
 # Explicit dependencies.
