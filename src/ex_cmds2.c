@@ -2448,6 +2448,19 @@ ex_listdo(eap)
 	win_T	*curwin;
 	tabpage_T   *curtab;
 #endif
+	/* cursor positioning */
+	linenr_T    lnum;
+	colnr_T	    col;
+#ifdef FEAT_VIRTUALEDIT
+	colnr_T	    coladd;
+#endif
+	colnr_T	    curswant;
+	linenr_T    topline;
+#ifdef FEAT_DIFF
+	int	    topfill;
+#endif
+	colnr_T	    leftcol;
+	colnr_T	    skipcol;
     } rst;
 
 #ifdef FEAT_WINDOWS
@@ -2501,6 +2514,18 @@ ex_listdo(eap)
 		|| eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo)
 	    rst.i = qf_get_cur_idx(eap);
 #endif
+	rst.lnum = curwin->w_cursor.lnum;
+	rst.col  = curwin->w_cursor.col;
+#ifdef FEAT_VIRTUALEDIT
+	rst.coladd = curwin->w_cursor.coladd;
+#endif
+	rst.curswant = curwin->w_curswant;
+	rst.topline  = curwin->w_topline;
+#ifdef FEAT_DIFF
+	rst.topfill = curwin->w_topfill;
+#endif
+	rst.leftcol = curwin->w_leftcol;
+	rst.skipcol = curwin->w_skipcol;
     }
 
     if (eap->cmdidx == CMD_windo
@@ -2717,7 +2742,36 @@ ex_listdo(eap)
 	    eap->addr_count = rst.i;
 	    eap->line1 = rst.i;
 	    ex_cc(eap);
+	    if (buf_valid(rst.curbuf))
+		goto_buffer(eap, DOBUF_FIRST, FORWARD, rst.curbuf->b_fnum);
 	}
+#endif
+	curwin->w_cursor.lnum = rst.lnum;
+	curwin->w_cursor.col  = rst.col;
+#ifdef FEAT_VIRTUALEDIT
+	curwin->w_cursor.coladd = rst.coladd;
+#endif
+	curwin->w_curswant = rst.curswant;
+	curwin->w_set_curswant = FALSE;
+	set_topline(curwin, rst.topline);
+#ifdef FEAT_DIFF
+	curwin->w_topfill = rst.topfill;
+#endif
+	curwin->w_leftcol = rst.leftcol;
+	curwin->w_skipcol = rst.skipcol;
+	check_cursor();
+	win_new_height(curwin, curwin->w_height);
+# ifdef FEAT_VERTSPLIT
+	win_new_width(curwin, W_WIDTH(curwin));
+# endif
+	changed_window_setting();
+
+	if (curwin->w_topline <= 0)
+	    curwin->w_topline = 1;
+	if (curwin->w_topline > curbuf->b_ml.ml_line_count)
+	    curwin->w_topline = curbuf->b_ml.ml_line_count;
+#ifdef FEAT_DIFF
+	check_topfill(curwin, TRUE);
 #endif
     }
 
