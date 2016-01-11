@@ -1,6 +1,11 @@
 @echo off
 :: Batch file for building/testing Vim on AppVeyor
 
+if /i "%ARCH%.%appveyor_repo_tag%"=="x86.false" (
+  echo Skip this build.
+  exit 0
+)
+
 if /I "%1"=="" (
   set target=build
 ) else (
@@ -24,12 +29,6 @@ curl -f -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%
 appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.0.2200/ActivePerl-5.22.0.2200-MSWin32-x86-64int-299195.zip -FileName perl.zip
 7z x perl.zip -oC:\ > nul
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
-:: Need a patch for Perl > 5.20 and VS <= 2012 
-:: should be fixed by patch 7.4.1011
-::
-:: curl -f -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
-:: git apply --check perl_vc2012.patch && git apply perl_vc2012.patch
-::
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-ix86-threaded.exe -FileName tcl.exe
 start /wait tcl.exe --directory C:\Tcl
@@ -41,19 +40,30 @@ pushd ..\ruby
 call win32\configure.bat
 echo on
 nmake .config.h.time
+xcopy /s .ext\include C:\Ruby22\include\ruby-2.2.0
 popd
+
+if /i "%appveyor_repo_tag%"=="false" goto skip_install_x86
+
 :: Install binary diff.exe and libintl.dll and iconv.dll
 curl -f -L -O ftp://ftp.vim.org/pub/vim/pc/gvim74.exe
 7z e gvim74.exe $0\diff.exe -o..
 curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-32.exe" -o gettext.exe
-7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
 copy c:\gettext\libintl-8.dll c:\gettext\libintl.dll
+:: Install NSIS and UPX
+curl -f -L -O http://downloads.sourceforge.net/project/nsis/NSIS%%202/2.50/nsis-2.50.zip
+7z x nsis-2.50.zip -oc:\ > nul
+curl -f -L http://upx.sourceforge.net/download/upx391w.zip -o upx.zip
+7z e upx.zip *\upx.exe -onsis > nul
+
+:skip_install_x86
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22\bin
 @echo off
 goto :eof
+
 
 :install_x64
 :: ----------------------------------------------------------------------
@@ -68,12 +78,6 @@ curl -f -L "http://downloads.sourceforge.net/project/luabinaries/5.3.2/Windows%%
 appveyor DownloadFile http://downloads.activestate.com/ActivePerl/releases/5.22.0.2200/ActivePerl-5.22.0.2200-MSWin32-x64-299195.zip -FileName perl.zip
 7z x perl.zip -oC:\ > nul
 for /d %%i in (C:\ActivePerl*) do move %%i C:\Perl522
-:: Need a patch for Perl > 5.20 and VS <= 2012 
-:: should be fixed by patch 7.4.1011
-::
-:: curl -f -L https://bitbucket.org/k_takata/vim-ktakata-mq/raw/65b664c6eaf4d1e70f81edd87719ade325c0849f/if_perl_vc2012.patch -o perl_vc2012.patch
-:: git apply --check perl_vc2012.patch && git apply perl_vc2012.patch
-::
 :: Tcl
 appveyor DownloadFile http://downloads.activestate.com/ActiveTcl/releases/8.6.4.1/ActiveTcl8.6.4.1.299124-win32-x86_64-threaded.exe -FileName tcl.exe
 start /wait tcl.exe --directory C:\Tcl
@@ -85,17 +89,26 @@ pushd ..\ruby
 call win32\configure.bat
 echo on
 nmake .config.h.time
+xcopy /s .ext\include C:\Ruby22-x64\include\ruby-2.2.0
 popd
+
+if /i "%appveyor_repo_tag%"=="false" goto skip_install_x64
+
 :: Install binary diff.exe and libintl.dll and iconv.dll
-:: TODO: Make this work with 64bit
 curl -f -L -O ftp://ftp.vim.org/pub/vim/pc/gvim74.exe
 7z e gvim74.exe $0\diff.exe -o..
 curl -f -L "https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.19.6-v1.14/gettext0.19.6-iconv1.14-shared-64.exe" -o gettext.exe
-7z x diffutils*.zip -oc:\gnuwin32\
 start /wait gettext.exe /verysilent /dir=c:\gettext
 copy c:\gettext\libintl-8.dll c:\gettext\libintl.dll
 :: libwinpthread is needed on Win64 for localizing messages
 ::copy c:\gettext\libwinpthread-1.dll ..\runtime
+:: Install NSIS and UPX
+curl -f -L -O http://downloads.sourceforge.net/project/nsis/NSIS%%202/2.50/nsis-2.50.zip
+7z x nsis-2.50.zip -oc:\ > nul
+curl -f -L http://upx.sourceforge.net/download/upx391w.zip -o upx.zip
+7z e upx.zip *\upx.exe -onsis > nul
+
+:skip_install_x64
 
 :: Update PATH
 path C:\Perl522\perl\bin;%path%;C:\Lua;C:\Tcl\bin;C:\Ruby22-x64\bin
@@ -116,12 +129,12 @@ nmake -f Make_mvc2.mak CPU=i386 ^
 	PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27 ^
 	PYTHON3_VER=34 DYNAMIC_PYTHON3=yes PYTHON3=C:\Python34 ^
 	LUA_VER=53 DYNAMIC_LUA=yes LUA=C:\Lua ^
-	TCL_VER=86 DYNAMIC_TCL=yes TCL=C:\Tcl ^
-	RUBY=C:\projects\ruby DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
-	RUBY_INSTALL_NAME=msvcrt-ruby$(RUBY_API_VER) RUBY_PLATFORM=i386-mswin32_100 ^
-	RUBY_INC="/I $(RUBY)\include /I $(RUBY)\.ext\include\$(RUBY_PLATFORM)" ^
+	TCL_VER=86 TCL_VER_LONG=8.6 DYNAMIC_TCL=yes TCL=C:\Tcl ^
+	RUBY=C:\Ruby22 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
+	RUBY_MSVCRT_NAME=msvcrt ^
 	WINVER=0x500 ^
 	|| exit 1
+@if /i "%appveyor_repo_tag%"=="false" goto check_executable
 :: Build CUI version
 nmake -f Make_mvc2.mak CPU=i386 ^
 	GUI=no OLE=no DIRECTX=no ^
@@ -130,16 +143,16 @@ nmake -f Make_mvc2.mak CPU=i386 ^
 	PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27 ^
 	PYTHON3_VER=34 DYNAMIC_PYTHON3=yes PYTHON3=C:\Python34 ^
 	LUA_VER=53 DYNAMIC_LUA=yes LUA=C:\Lua ^
-	TCL_VER=86 DYNAMIC_TCL=yes TCL=C:\Tcl ^
-	RUBY=C:\projects\ruby DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
-	RUBY_INSTALL_NAME=msvcrt-ruby$(RUBY_API_VER) RUBY_PLATFORM=i386-mswin32_100 ^
-	RUBY_INC="/I $(RUBY)\include /I $(RUBY)\.ext\include\$(RUBY_PLATFORM)" ^
+	TCL_VER=86 TCL_VER_LONG=8.6 DYNAMIC_TCL=yes TCL=C:\Tcl ^
+	RUBY=C:\Ruby22 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
+	RUBY_MSVCRT_NAME=msvcrt ^
 	WINVER=0x500 ^
 	|| exit 1
 :: Build translations
 pushd po
 nmake -f Make_mvc.mak GETTEXT_PATH=C:\cygwin\bin VIMRUNTIME=..\..\runtime install-all || exit 1
 popd
+goto check_executable
 
 @echo off
 goto :eof
@@ -158,12 +171,12 @@ nmake -f Make_mvc2.mak CPU=AMD64 ^
 	PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27-x64 ^
 	PYTHON3_VER=34 DYNAMIC_PYTHON3=yes PYTHON3=C:\Python34-x64 ^
 	LUA_VER=53 DYNAMIC_LUA=yes LUA=C:\Lua ^
-	TCL_VER=86 DYNAMIC_TCL=yes TCL=C:\Tcl ^
-	RUBY=C:\projects\ruby DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
-	RUBY_INSTALL_NAME=msvcrt-ruby$(RUBY_API_VER) RUBY_PLATFORM=x64-mswin64_100 ^
-	RUBY_INC="/I $(RUBY)\include /I $(RUBY)\.ext\include\$(RUBY_PLATFORM)" ^
+	TCL_VER=86 TCL_VER_LONG=8.6 DYNAMIC_TCL=yes TCL=C:\Tcl ^
+	RUBY=C:\Ruby22-x64 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
+	RUBY_MSVCRT_NAME=msvcrt ^
 	WINVER=0x500 ^
 	|| exit 1
+@if /i "%appveyor_repo_tag%"=="false" goto check_executable
 :: Build CUI version
 nmake -f Make_mvc2.mak CPU=AMD64 ^
 	GUI=no OLE=no DIRECTX=no ^
@@ -172,16 +185,81 @@ nmake -f Make_mvc2.mak CPU=AMD64 ^
 	PYTHON_VER=27 DYNAMIC_PYTHON=yes PYTHON=C:\Python27-x64 ^
 	PYTHON3_VER=34 DYNAMIC_PYTHON3=yes PYTHON3=C:\Python34-x64 ^
 	LUA_VER=53 DYNAMIC_LUA=yes LUA=C:\Lua ^
-	TCL_VER=86 DYNAMIC_TCL=yes TCL=C:\Tcl ^
-	RUBY=C:\projects\ruby DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
-	RUBY_INSTALL_NAME=msvcrt-ruby$(RUBY_API_VER) RUBY_PLATFORM=x64-mswin64_100 ^
-	RUBY_INC="/I $(RUBY)\include /I $(RUBY)\.ext\include\$(RUBY_PLATFORM)" ^
+	TCL_VER=86 TCL_VER_LONG=8.6 DYNAMIC_TCL=yes TCL=C:\Tcl ^
+	RUBY=C:\Ruby22-x64 DYNAMIC_RUBY=yes RUBY_VER=22 RUBY_VER_LONG=2.2.0 ^
+	RUBY_MSVCRT_NAME=msvcrt ^
 	WINVER=0x500 ^
 	|| exit 1
 :: Build translations
 pushd po
 nmake -f Make_mvc.mak GETTEXT_PATH=C:\cygwin\bin VIMRUNTIME=..\..\runtime install-all || exit 1
 popd
+goto check_executable
+
+
+:check_executable
+:: ----------------------------------------------------------------------
+.\gvim -silent -register
+.\gvim -u NONE -c "redir @a | ver | 0put a | wq!" ver.txt
+type ver.txt
+if /i "%appveyor_repo_tag%"=="true" (
+  .\vim --version
+)
+@echo off
+goto :eof
+
+
+:package_x86
+:package_x64
+:: ----------------------------------------------------------------------
+if /i "%appveyor_repo_tag%"=="false" goto :eof
+@echo on
+
+:: Build both 64- and 32-bit versions of gvimext.dll for the installer
+start /wait cmd /c "setenv /x64 && cd GvimExt && nmake clean all"
+move GvimExt\gvimext.dll GvimExt\gvimext64.dll
+start /wait cmd /c "setenv /x86 && cd GvimExt && nmake clean all"
+:: Create zip packages
+copy /Y ..\README.txt ..\runtime
+copy /Y ..\vimtutor.bat ..\runtime
+copy /Y *.exe ..\runtime\
+copy /Y xxd\*.exe ..\runtime
+mkdir ..\runtime\GvimExt
+copy /Y GvimExt\gvimext*.dll ..\runtime\GvimExt\
+copy /Y GvimExt\README.txt   ..\runtime\GvimExt\
+copy /Y GvimExt\*.inf        ..\runtime\GvimExt\
+copy /Y GvimExt\*.reg        ..\runtime\GvimExt\
+copy /Y c:\projects\diff.exe ..\runtime\
+copy /Y c:\gettext\libiconv*.dll ..\runtime\
+copy /Y c:\gettext\libintl.dll ..\runtime\
+:: libwinpthread is needed on Win64 for localizing messages
+if exist c:\gettext\libwinpthread-1.dll copy /Y c:\gettext\libwinpthread-1.dll ..\runtime\
+7z a ..\gvim_%ARCH%.zip ..\runtime\*
+
+:: Create x86 installer
+if /i "%ARCH%"=="x64" goto :eof
+c:\cygwin\bin\bash -lc "cd /cygdrive/c/projects/vim/runtime/doc && touch ../../src/auto/config.mk && make uganda.nsis.txt"
+copy gvim.exe gvim_ole.exe
+copy vim.exe vimw32.exe
+copy xxd\xxd.exe xxdw32.exe
+copy install.exe installw32.exe
+copy uninstal.exe uninstalw32.exe
+pushd ..\nsis && c:\nsis-2.50\makensis /DVIMRT=..\runtime gvim.nsi "/XOutFile ..\gvim_%ARCH%.exe" && popd
+
+@echo off
+goto :eof
+
+
+:test_x86
+:test_x64
+:: ----------------------------------------------------------------------
+@echo on
+cd testdir
+nmake -f Make_dos.mak VIMPROG=..\gvim || exit 1
+if /i "%appveyor_repo_tag%"=="true" (
+  nmake -f Make_dos.mak clean
+  nmake -f Make_dos.mak VIMPROG=..\vim || exit 1
+)
 
 @echo off
 goto :eof

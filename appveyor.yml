@@ -23,37 +23,23 @@ before_build:
 build_script:
   - cd src
   - appveyor.bat build
-  - .\gvim -silent -register
-  - .\gvim -u NONE -c "redir @a | ver | 0put a | wq!" ver.txt
-  - type ver.txt
-  - .\vim --version
 
 after_build:
-  - copy /Y *.exe ..\runtime\
-  - copy /Y xxd\*.exe ..\runtime
-  - mkdir ..\runtime\GvimExt
-  - copy /Y GvimExt\gvimext.dll ..\runtime\GvimExt\
-  - copy /Y GvimExt\README.txt  ..\runtime\GvimExt\
-  - copy /Y GvimExt\*.inf       ..\runtime\GvimExt\
-  - copy /Y GvimExt\*.reg       ..\runtime\GvimExt\
-  - copy /Y c:\projects\diff.exe ..\runtime\
-  - copy /Y c:\gettext\libiconv*.dll ..\runtime\
-  - copy /Y c:\gettext\libintl.dll ..\runtime\
-  # libwinpthread is needed on Win64 for localizing messages
-  - if exist c:\gettext\libwinpthread-1.dll copy /Y c:\gettext\libwinpthread-1.dll ..\runtime\
-  - 7z a ..\gvim_%ARCH%.zip ..\runtime\*
+  - appveyor.bat package
 
 test_script:
-  - cd testdir
-  - nmake -f Make_dos.mak VIMPROG=..\gvim
-  - nmake -f Make_dos.mak clean
-  - nmake -f Make_dos.mak VIMPROG=..\vim
+  - appveyor.bat test
+
 
 artifacts:
   - path: gvim_x86.zip
     name: gVim_x86
   - path: gvim_x64.zip
     name: gVim_x64
+  - path: gvim_x86.exe
+    name: gVim_x86_installer
+  - path: gvim_x64.exe
+    name: gVim_x64_installer
 
 deploy:
   - provider: GitHub
@@ -67,5 +53,5 @@ deploy:
     draft: false
     prerelease: false
 #   uncomment the following lines, once this is merged to Vim main repository:
-#    on:
-#      appveyor_repo_tag: true
+    on:
+      appveyor_repo_tag: true
