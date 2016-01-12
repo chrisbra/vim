@@ -52,9 +52,6 @@ curl -f -L https://raw.githubusercontent.com/chrisbra/vim-mq-patches/master/fix_
 git apply --check fix_mzscheme.diff && git apply fix_mzscheme.diff || exit 1
 curl -f -L https://mirror.racket-lang.org/releases/6.3/installers/racket-minimal-6.3-i386-win32.exe -o racket.exe
 c:\7zip\7z.exe x racket.exe -aoa -r -oc:\racket63 > nul
-dir c:\racket63\
-dir c:\racket63\include\
-
 
 if /i "%appveyor_repo_tag%"=="false" goto skip_install_x86
 
@@ -114,11 +111,6 @@ curl -f -L https://raw.githubusercontent.com/chrisbra/vim-mq-patches/master/fix_
 git apply --check fix_mzscheme.diff && git apply fix_mzscheme.diff || exit 1
 curl -f -L https://mirror.racket-lang.org/releases/6.3/installers/racket-minimal-6.3-x86_64-win32.exe -o racket.exe
 c:\7zip-x64\7z.exe x racket.exe -y -r -oc:\racket63-x64 > nul
-c:\7zip-x64\7z.exe
-dir c:\racket63-x64\
-dir c:\racket63-x64\include
-dir 'c:\racket64-x64\$_OUTDIR'
-::dir /s c:\racket63-x64\
 
 if /i "%appveyor_repo_tag%"=="false" goto skip_install_x64
 
