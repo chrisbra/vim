@@ -1,3 +1,7 @@
+matrix:
+  -os: linux
+  -os: osx
+
 language: c
 
 compiler:
