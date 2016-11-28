@@ -41,7 +41,7 @@
 /* Uncomment the first if you do not want to see debugging logs or files
  * related to regular expressions, even when compiling with -DDEBUG.
  * Uncomment the second to get the regexp debugging. */
-/* #undef DEBUG */
+#undef DEBUG
 /* #define DEBUG */
 
 #include "vim.h"
