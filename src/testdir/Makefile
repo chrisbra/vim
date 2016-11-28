@@ -90,7 +90,7 @@ test1.out: test1.in
 
 	# Check if the test.out file matches test.ok.
 	@/bin/sh -c "if test -f test.out; then \
-		  if diff test.out $*.ok; \
+		  if diff -u test.out $*.ok; \
 		  then mv -f test.out $*.out; \
 		  else echo $* FAILED >>test.log; mv -f test.out $*.failed; \
 		  fi \
