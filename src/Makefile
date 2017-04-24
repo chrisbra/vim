@@ -606,7 +606,7 @@ COMPILEDBY=Christian Brabandt <cb@256bit.org>
 #CFLAGS = -g -Wall -Wmissing-prototypes
 #CFLAGS = -O6 -fno-strength-reduce -Wall -Wshadow -Wmissing-prototypes
 #CFLAGS = -g -DDEBUG -Wall -Wshadow -Wmissing-prototypes
-#CFLAGS = -g -DDEBUG -Wall -Wextra -Wshadow -Wmissing-prototypes -Wmaybe-uninitialized
+CFLAGS = -g -DDEBUG -Wall -Wextra -Wshadow -Wmissing-prototypes -Wmaybe-uninitialized
 #CFLAGS = -g -O2 '-DSTARTUPTIME="vimstartup"' -fno-strength-reduce -Wall -Wmissing-prototypes
 
 # Use this with GCC to check for mistakes, unused arguments, etc.
