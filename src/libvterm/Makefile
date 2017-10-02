@@ -15,9 +15,9 @@ ifeq ($(shell uname),SunOS)
   override CFLAGS +=-D__EXTENSIONS__ -D_XPG6 -D__XOPEN_OR_POSIX
 endif
 
-ifeq ($(DEBUG),1)
-  override CFLAGS +=-ggdb -DDEBUG
-endif
+"ifeq ($(DEBUG),1)
+"  override CFLAGS +=-ggdb -DDEBUG
+"endif
 
 ifeq ($(PROFILE),1)
   override CFLAGS +=-pg
