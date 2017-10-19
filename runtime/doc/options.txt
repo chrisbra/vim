@@ -214,6 +214,14 @@ are halved.  This makes sure it works both when you expect backslashes to be
 halved and when you expect the backslashes to be kept.  The third gives a
 result which is probably not what you want.  Avoid it.
 
+							*let-option-backslash*
+To avoid the need to escape special characeters, use the |:let-&| command
+instead of a |:set| command, which sets the option value exactly to the value
+provided. Note: make use of single quotes to avoid interpretation of
+backslashes in double-quotes |expr-string|.  To set the 'titlestring' as in
+the previous paragraph to 'hi "there"': >
+   :let &titlestring='hi "there"'
+<
 				*add-option-flags* *remove-option-flags*
 				*E539* *E550* *E551* *E552*
 Some options are a list of flags.  When you want to add a flag to such an
@@ -1072,6 +1080,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	This option cannot be set from a |modeline| or in the |sandbox|, for
 	security reasons.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'backupext'* *'bex'* *E589*
 'backupext' 'bex'	string	(default "~", for VMS: "_")
 			global
@@ -1115,6 +1127,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 <	Note that the default also makes sure that "crontab -e" works (when a
 	backup would be made by renaming the original file crontab won't see
 	the newly created file).  Also see 'backupcopy' and |crontab|.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 						*'balloondelay'* *'bdlay'*
 'balloondelay' 'bdlay'	number	(default: 600)
@@ -1460,6 +1476,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 <	This option cannot be set from a |modeline| or in the |sandbox|, for
 	security reasons.
 	(parts of 'cdpath' can be passed to the shell to expand file names).
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 						*'cedit'*
 'cedit'			string	(Vi default: "", Vim default: CTRL-F)
@@ -2559,6 +2579,9 @@ A jump table for the options with a short description can be found at |Q_op|.
 	To avoid that use `:let` with a single quote string: >
 		let &l:define = '^\s*\ze\k\+\s*=\s*function('
 <
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 			*'delcombine'* *'deco'* *'nodelcombine'* *'nodeco'*
 'delcombine' 'deco'	boolean (default off)
@@ -2967,6 +2990,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	Scanf-like description of the format for the lines in the error file
 	(see |errorformat|).
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 				     *'esckeys'* *'ek'* *'noesckeys'* *'noek'*
 'esckeys' 'ek'		boolean	(Vim default: on, Vi default: off)
 			global
@@ -3349,6 +3376,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	It is not allowed to change text or jump to another window while
 	evaluating 'foldexpr' |textlock|.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'foldignore'* *'fdi'*
 'foldignore' 'fdi'	string (default: "#")
 			local to window
@@ -3482,6 +3513,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	It is not allowed to change text or jump to another window while
 	evaluating 'foldtext' |textlock|.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'formatexpr'* *'fex'*
 'formatexpr' 'fex'	string (default "")
 			local to buffer
@@ -3518,6 +3553,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	This option cannot be set in a modeline when 'modelineexpr' is off.
 	NOTE: This option is set to "" when 'compatible' is set.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 					*'formatlistpat'* *'flp'*
 'formatlistpat' 'flp'	string (default: "^\s*\d\+[\]:.)}\t ]\s*")
 			local to buffer
@@ -3530,6 +3569,21 @@ A jump table for the options with a short description can be found at |Q_op|.
 	like there is no match.
 	The default recognizes a number, followed by an optional punctuation
 	character and white space.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
+        Here is an example, which makes use of the unicode char '→' >
+
+        :let &flp='^\s*\(\(\a\|\d\+\)[]:.)}\t/-]\|[-*.·→+]\)\s\+'
+<
+        This means start of line, followed by any number of whitespace,
+        followed by
+        - either one alphabetic character or at least one digit, followed
+          by any of "]:.)}\t/-"
+        - or any of "-*.·→+"
+        followed by at least one whitespace.
 
 					*'formatoptions'* *'fo'*
 'formatoptions' 'fo'	string (Vim default: "tcq", Vi default: "vt")
@@ -4326,7 +4380,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	appears, is used as the file name.  Use this to include characters
 	that are not in 'isfname', such as a space.  You can then use
 	'includeexpr' to process the matched text.
-	See |option-backslash| about including spaces and backslashes.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 						*'includeexpr'* *'inex'*
 'includeexpr' 'inex'	string	(default "")
@@ -4348,6 +4405,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 
 	It is not allowed to change text or jump to another window while
 	evaluating 'includeexpr' |textlock|.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 				 *'incsearch'* *'is'* *'noincsearch'* *'nois'*
 'incsearch' 'is'	boolean	(default off, set in |defaults.vim| if the
@@ -4436,6 +4497,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 
 	It is not allowed to change text or jump to another window while
 	evaluating 'indentexpr' |textlock|.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 
 						*'indentkeys'* *'indk'*
@@ -5721,6 +5786,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 <	Replace the ';' with a ':' or whatever separator is used.  Note that
 	this doesn't work when $INCL contains a comma or white space.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'perldll'*
 'perldll'		string	(default depends on the build)
 			global
@@ -6252,6 +6321,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	Example: >
 		:set rulerformat=%15(%c%V\ %p%%%)
 <
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 				*'runtimepath'* *'rtp'* *vimfiles*
 'runtimepath' 'rtp'	string	(default:
 					Unix:  "$HOME/.vim,
@@ -6343,6 +6416,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	included.
 	This option cannot be set from a |modeline| or in the |sandbox|, for
 	security reasons.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 						*'scroll'* *'scr'*
 'scroll' 'scr'		number	(default: half the window height)
@@ -7072,10 +7149,12 @@ A jump table for the options with a short description can be found at |Q_op|.
 	with SpellCap |hl-SpellCap| (unless the word is also badly spelled).
 	When this check is not wanted make this option empty.
 	Only used when 'spell' is set.
-	Be careful with special characters, see |option-backslash| about
-	including spaces and backslashes.
 	To set this option automatically depending on the language, see
 	|set-spc-auto|.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 						*'spellfile'* *'spf'*
 'spellfile' 'spf'	string	(default empty)
@@ -7255,6 +7334,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 			feature}
 	When nonempty, this option determines the content of the status line.
 	Also see |status-line|.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 	The option consists of printf style '%' items interspersed with
 	normal text.  Each status line item is of the form:
@@ -7579,6 +7662,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 
 	Keep in mind that only one of the tab pages is the current one, others
 	are invisible and you can't jump to their windows.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 
 						*'tabpagemax'* *'tpm'*
@@ -8087,6 +8174,11 @@ A jump table for the options with a short description can be found at |Q_op|.
 	'titlestring' is not empty.
 	This option cannot be set from a |modeline| or in the |sandbox|, for
 	security reasons.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'titlestring'*
 'titlestring'		string	(default "")
 			global
@@ -8117,6 +8209,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	NOTE: Use of special characters in 'titlestring' may cause the display
 	to be garbled (e.g., when it contains a CR or NL character).
 	{not available when compiled without the |+statusline| feature}
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 				*'toolbar'* *'tb'*
 'toolbar' 'tb'		string	(default "icons,tooltips")
@@ -8450,6 +8546,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	This option cannot be set from a |modeline| or in the |sandbox|, for
 	security reasons.
 
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
+
 						*'viewoptions'* *'vop'*
 'viewoptions' 'vop'	string	(default: "folds,options,cursor,curdir")
 			global
@@ -8592,6 +8692,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 	security reasons.
 	NOTE: This option is set to the Vim default value when 'compatible'
 	is reset.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 				*'viminfofile'* *'vif'*
 'viminfofile' 'vif'	string	(default: "")
@@ -8745,6 +8849,10 @@ A jump table for the options with a short description can be found at |Q_op|.
 <	The use of |:set+=| and |:set-=| is preferred when adding or removing
 	a pattern from the list.  This avoids problems when a future version
 	uses another default.
+
+        Note that backslashes must be used to escape characters that ":set"
+        handles differently (space, backslash, double quote, etc., see
+        |option-backslash| and |let-option-backslash| on how to avoid it)
 
 
 			*'wildignorecase'* *'wic'* *'nowildignorecase'* *'nowic'*
