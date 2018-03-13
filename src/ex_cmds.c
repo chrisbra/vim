@@ -4091,6 +4091,7 @@ do_ecmd(
 		vim_free(new_name);
 		goto theend;
 	    }
+	    curbuf->b_u_save_buf++;
 	    u_unchanged(curbuf);
 	    buf_freeall(curbuf, BFA_KEEP_UNDO);
 

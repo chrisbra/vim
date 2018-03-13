@@ -2678,7 +2678,7 @@ failed:
 	char_u	hash[UNDO_HASH_SIZE];
 
 	sha256_finish(&sha_ctx, hash);
-	u_read_undo(NULL, hash, fname);
+	u_read_undo(NULL, hash, fname, FALSE);
     }
 #endif
 
@@ -4565,8 +4565,17 @@ restore_backup:
 			    && reset_changed
 			    && !checking_conversion);
 	if (write_undo_file)
+	{
+	    if (p_ur < 0 || buf->b_ml.ml_line_count <= p_ur)
+	    {
+		/* Save buffer contents in undotree
+		* to enable recovery, when 'ur' is set */
+		u_savecommon(0, buf->b_ml.ml_line_count + 1, 0, TRUE);
+		buf->b_u_save_buf++;
+	    }
 	    /* Prepare for computing the hash value of the text. */
 	    sha256_start(&sha_ctx);
+	}
 #endif
 
 	write_info.bw_len = bufsize;

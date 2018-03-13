@@ -13303,6 +13303,7 @@ f_undotree(typval_T *argvars UNUSED, typval_T *rettv)
 	dict_add_nr_str(dict, "seq_cur", curbuf->b_u_seq_cur, NULL);
 	dict_add_nr_str(dict, "time_cur", (long)curbuf->b_u_time_cur, NULL);
 	dict_add_nr_str(dict, "save_cur", (long)curbuf->b_u_save_nr_cur, NULL);
+	dict_add_nr_str(dict, "whole_buf", (long)curbuf->b_u_save_buf, NULL);
 
 	list = list_alloc();
 	if (list != NULL)

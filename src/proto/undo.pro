@@ -9,7 +9,7 @@ int u_savecommon(linenr_T top, linenr_T bot, linenr_T newbot, int reload);
 void u_compute_hash(char_u *hash);
 char_u *u_get_undo_file_name(char_u *buf_ffname, int reading);
 void u_write_undo(char_u *name, int forceit, buf_T *buf, char_u *hash);
-void u_read_undo(char_u *name, char_u *hash, char_u *orig_name);
+void u_read_undo(char_u *name, char_u *hash, char_u *orig_name, int force);
 void u_undo(int count);
 void u_redo(int count);
 void undo_time(long step, int sec, int file, int absolute);

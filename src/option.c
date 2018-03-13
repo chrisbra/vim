@@ -8154,7 +8154,7 @@ set_bool_option(
 			&& !curbufIsChanged() && curbuf->b_ml.ml_mfp != NULL)
 		{
 		    u_compute_hash(hash);
-		    u_read_undo(NULL, hash, curbuf->b_fname);
+		    u_read_undo(NULL, hash, curbuf->b_fname, FALSE);
 		}
 	    }
 	    curbuf = save_curbuf;

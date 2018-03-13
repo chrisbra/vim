@@ -739,6 +739,7 @@ nomem:
 
 /* extra fields for header */
 # define UF_LAST_SAVE_NR	1
+# define UF_SAVE_WHOLE_BUF	2
 
 /* extra fields for uhp */
 # define UHP_SAVE_NR		1
@@ -1220,6 +1221,9 @@ serialize_header(bufinfo_T *bi, char_u *hash)
     undo_write_bytes(bi, 4, 1);
     undo_write_bytes(bi, UF_LAST_SAVE_NR, 1);
     undo_write_bytes(bi, (long_u)buf->b_u_save_nr_last, 4);
+    undo_write_bytes(bi, 4, 1);
+    undo_write_bytes(bi, UF_SAVE_WHOLE_BUF, 1);
+    undo_write_bytes(bi, (long_u)buf->b_u_save_buf, 4);
 
     undo_write_bytes(bi, 0, 1);  /* end marker */
 
@@ -1783,7 +1787,7 @@ theend:
  * "hash[UNDO_HASH_SIZE]" must be the hash value of the buffer text.
  */
     void
-u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
+u_read_undo(char_u *name, char_u *hash, char_u *orig_name, int force)
 {
     char_u	*file_name;
     FILE	*fp;
@@ -1796,6 +1800,7 @@ u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
     long	old_header_seq, new_header_seq, cur_header_seq;
     long	seq_last, seq_cur;
     long	last_save_nr = 0;
+    long	last_save_buf = 0;
     short	old_idx = -1, new_idx = -1, cur_idx = -1;
     long	num_read_uhps = 0;
     time_t	seq_time;
@@ -1914,8 +1919,8 @@ u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
 	goto error;
     }
     line_count = (linenr_T)undo_read_4c(&bi);
-    if (memcmp(hash, read_hash, UNDO_HASH_SIZE) != 0
-				  || line_count != curbuf->b_ml.ml_line_count)
+    if ((memcmp(hash, read_hash, UNDO_HASH_SIZE) != 0
+	|| line_count != curbuf->b_ml.ml_line_count) && !force)
     {
 	if (p_verbose > 0 || name != NULL)
 	{
@@ -1928,6 +1933,7 @@ u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
 	}
 	goto error;
     }
+
 
     /* Read undo data for "U" command. */
     str_len = undo_read_4c(&bi);
@@ -1965,6 +1971,9 @@ u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
 	{
 	    case UF_LAST_SAVE_NR:
 		last_save_nr = undo_read_4c(&bi);
+		break;
+	    case UF_SAVE_WHOLE_BUF:
+		last_save_buf = undo_read_4c(&bi);
 		break;
 	    default:
 		/* field not supported, skip */
@@ -2098,9 +2107,44 @@ u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
     curbuf->b_u_time_cur = seq_time;
     curbuf->b_u_save_nr_last = last_save_nr;
     curbuf->b_u_save_nr_cur = last_save_nr;
+    curbuf->b_u_save_buf = last_save_buf;
 
     curbuf->b_u_synced = TRUE;
     vim_free(uhp_table);
+
+    if (force)
+    {
+      if (curbuf->b_u_save_nr_last == 0
+	|| curbuf->b_u_save_buf == 0)
+      {
+	EMSG(_("Recovery from Undo not possible!"));
+	u_blockfree(curbuf);
+	curbuf->b_u_line_lnum = 0;
+	curbuf->b_u_line_colnr = 0;
+	curbuf->b_u_numhead = 0;
+	curbuf->b_u_seq_last = 0;
+	curbuf->b_u_seq_cur = 0;
+	curbuf->b_u_time_cur = 0;
+	curbuf->b_u_save_nr_last = 0;
+	curbuf->b_u_save_nr_cur = 0;
+	curbuf->b_u_save_buf = 0;
+      }
+      else
+	/* Move to just after the last file write
+	   TODO: Create as many new lines as are at the position
+	   in the undotree, where b_u_save_buf points to,
+	   using something like:
+
+	   for (i=0; i < lines_in_undotree; i++)
+		ml_append(curbuf->b_ml.ml_line_count - 1, (char_u *) "", (colnr_T)0, FALSE);
+	   appended_lines_mark(curbuf->b_ml.ml_line_count - i, i);
+
+	   Use undojoin!
+	   */
+
+	undo_time(curbuf->b_u_save_buf, FALSE, TRUE, TRUE);
+    }
+
 
 #ifdef U_DEBUG
     for (i = 0; i < num_head; ++i)
