@@ -1,6 +1,8 @@
 " Script to check if all the locales used in spell files are available.
 
-grep /sys env LANG/ */main.aap
+let _grepprg=&grepprg
+set grepprg&vim
+grep /sys */main.aap
 let not_supported = []
 for item in getqflist()
   let lang = substitute(item.text, '.*LANG=\(\S\+\).*', '\1', '')
@@ -19,3 +21,4 @@ if len(not_supported) > 0
 else
   echo "Everything appears to be OK"
 endif
+let &grepprg=_grepprg
