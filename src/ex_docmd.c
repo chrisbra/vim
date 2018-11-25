@@ -4299,6 +4299,13 @@ get_address(
 		    lnum -= n;
 		else
 		    lnum += n;
+#ifdef FEAT_FOLDING
+		// FIXME: should the target really be adjusted?
+		// Adjust the target line to be after the folded area
+		// doesn't matter if it is relative or not.
+		if (addr_type == ADDR_LINES)
+		    (void)hasFolding(lnum, NULL, &lnum);
+#endif
 	    }
 	}
     } while (*cmd == '/' || *cmd == '?');
