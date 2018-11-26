@@ -665,14 +665,16 @@ may_adjust_incsearch_highlighting(
 	    // Move just before the current match, so that when nv_search
 	    // finishes the cursor will be put back on the match.
 	    is_state->search_start = t;
-	    (void)decl(&is_state->search_start);
+	    if (firstc == '/')
+		(void)decl(&is_state->search_start);
 	}
-	else if (c == Ctrl_G && firstc == '?')
+	else if (c == Ctrl_G && (firstc == '?' || firstc == ':'))
 	{
 	    // Move just after the current match, so that when nv_search
 	    // finishes the cursor will be put back on the match.
 	    is_state->search_start = t;
-	    (void)incl(&is_state->search_start);
+	    if (firstc == '?')
+		(void)incl(&is_state->search_start);
 	}
 	if (LT_POS(t, is_state->search_start) && c == Ctrl_G)
 	{
