@@ -13,6 +13,7 @@
 # define UNUSED
 #endif
 
+ #undef DEBUG
 #ifdef DEBUG
 # define DEBUG_LOG(s) fprintf(stderr, s)
 # define DEBUG_LOG1(s, a) fprintf(stderr, s, a)
