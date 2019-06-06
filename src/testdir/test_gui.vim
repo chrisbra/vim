@@ -875,4 +875,17 @@ func Test_gui_recursive_mapping()
   nunmap <C-W>a
 endfunc
 
+" Test for using `guioptions+=!`, should not trigger TerminalOpen autocmd
+func Test_gui_shell()
+  set number
+  !true
+  call assert_equal(1, &number)
+  autocmd TerminalOpen * :set nonumber
+  !true
+  call assert_equal(1, &number)
+  set guioptions+=!
+  !true
+  call assert_equal(1, &number)
+  autocmd! TerminalOpen
+endfunc
 " vim: shiftwidth=2 sts=2 expandtab
