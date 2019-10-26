@@ -3081,6 +3081,16 @@ write_viminfo(char_u *file, int forceit)
     fname = viminfo_filename(file);	// may set to default if NULL
     if (fname == NULL)
 	return;
+#ifdef HAVE_READLINK
+    {
+	char_u	buf[MAXPATHL];
+	if (resolve_symlink(fname, buf) == OK)
+	{
+	    vim_free(fname);
+	    fname = vim_strsave(buf);
+	}
+    }
+#endif
 
     fp_in = mch_fopen((char *)fname, READBIN);
     if (fp_in == NULL)
