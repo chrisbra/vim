@@ -9,6 +9,6 @@ freebsd_12_task:
     pkg install -y gettext 
   build_script:
     - ./configure --with-features=$HUGE
-    - make
+    - make -j2
   test_script:
     - make test
