@@ -36,8 +36,8 @@
     Error: configure did not run properly.  Check auto/config.log.
 # endif
 
-# if defined(UNIX) && !defined(MACOS_X)
-// Needed for strptime().  Needs to be done early, since header files can
+# if defined(UNIX) && !defined(MACOS_X) && !defined(__unix__)
+// Needed for strptime() on Cygwin.  Needs to be done early, since header files can
 // include other header files and end up including time.h, where these symbols
 // matter for Vim.
 // 700 is needed for mkdtemp().
