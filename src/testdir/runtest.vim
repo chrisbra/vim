@@ -142,7 +142,7 @@ func RunTheTest(test)
     endtry
   endif
 
-  let timer_id = timer_start(15, { -> interrupt()})
+  "let timer_id = timer_start(15, { -> interrupt()})
   if a:test =~ 'Test_nocatch_'
     " Function handles errors itself.  This avoids skipping commands after the
     " error.
@@ -160,7 +160,7 @@ func RunTheTest(test)
       call add(v:errors, 'Caught exception in ' . a:test . ': ' . v:exception . ' @ ' . v:throwpoint)
     endtry
   endif
-  call timer_stop(timer_id)
+  "call timer_stop(timer_id)
 
   " In case 'insertmode' was set and something went wrong, make sure it is
   " reset to avoid trouble with anything else.
