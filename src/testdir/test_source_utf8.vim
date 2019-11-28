@@ -1,4 +1,5 @@
 " Test the :source! command
+source check.vim
 
 func Test_source_utf8()
   " check that sourcing a script with 0x80 as second byte works
@@ -35,6 +36,7 @@ endfunc
 
 " Test for sourcing a file with CTRL-V's at the end of the line
 func Test_source_ctrl_v()
+    CheckNotBSD
     call writefile(['map __1 afirst',
 		\ 'map __2 asecond',
 		\ 'map __3 athird',
