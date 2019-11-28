@@ -56,7 +56,7 @@ indenttest:
 	cd runtime/indent && \
 		$(MAKE) clean && \
 		$(MAKE) test VIM="$(VIM_FOR_INDENTTEST)" || true; \
-		for i in testdir/*.fail; do git diff --no-index --no-color $${i%.fail}.ok $$i; done
+		for i in testdir/*.fail; do diff -NU3 $${i%.fail}.ok $$i; done
 		
 
 #########################################################################
