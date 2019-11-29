@@ -67,6 +67,7 @@ endfunc
 " Command to check for running on Unix
 command CheckNotBSD call CheckNotBSD()
 func CheckNotBSD()
+  return
   if has('bsd')
     throw 'Skipped: does not work on BSD'
   endif
