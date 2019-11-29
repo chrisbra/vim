@@ -4,9 +4,7 @@ source check.vim
 func Test_source_utf8()
   " check that sourcing a script with 0x80 as second byte works
   " does not work correctly on BSD
-  if has("bsd")
-    throw "Skipped: :source! does not work correctly on BSD"
-  endif
+  CheckNotBSD
   new
   call setline(1, [':%s/àx/--à1234--/g', ':%s/Àx/--À1234--/g'])
   write! Xscript
