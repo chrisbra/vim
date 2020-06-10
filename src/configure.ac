@@ -2443,11 +2443,12 @@ elif test "x$MACOS_X" = "xyes" -a "x$with_x" = "xno" ; then
 
 else
 
+dnl Prefer GTK3 over GTK2 in the auto-detect case
   case "$enable_gui_canon" in
     no|none)	AC_MSG_RESULT(no GUI support) ;;
     yes|""|auto)	AC_MSG_RESULT(yes/auto - automatic GUI support)
 		gui_auto=yes
-		SKIP_GTK2=
+		SKIP_GTK3=
 		SKIP_GNOME=
 		SKIP_MOTIF=
 		SKIP_ATHENA=

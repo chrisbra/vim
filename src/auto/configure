@@ -9273,7 +9273,7 @@ $as_echo "no GUI support" >&6; } ;;
     yes|""|auto)	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes/auto - automatic GUI support" >&5
 $as_echo "yes/auto - automatic GUI support" >&6; }
 		gui_auto=yes
-		SKIP_GTK2=
+		SKIP_GTK3=
 		SKIP_GNOME=
 		SKIP_MOTIF=
 		SKIP_ATHENA=
