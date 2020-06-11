@@ -1333,13 +1333,7 @@ find_locales(void)
     garray_T	locales_ga;
     char_u	*loc;
     char_u	*locale_a;
-    int		len = 0;
-#ifdef MSWIN
-    char_u	*vimruntime;
-    char_u	*buf;
-    int		options = WILD_SILENT|WILD_USE_NL|WILD_KEEP_ALL;
-    expand_T	xpc;
-#endif
+    size_t	len = 0;
 
     // Find all available locales by running command "locale -a".  If this
     // doesn't work we won't have completion.
@@ -1347,21 +1341,26 @@ find_locales(void)
     locale_a = get_cmd_output((char_u *)"locale -a",
 						    NULL, SHELL_SILENT, NULL);
 #else
-    ExpandInit(&xpc);
-    xpc.xp_context = EXPAND_FILES;
-    vimruntime = ExpandOne(&xpc, (char_u *)"$VIMRUNTIME/lang", NULL, options, WILD_ALL);
-    len = STRLEN(vimruntime);
-    buf = alloc(len + 3);
-    if (buf != NULL)
+    // Find all available locales by examining the directories in $VIMRUNTIME/lang/
     {
-	memcpy(buf, vimruntime, len);
-	buf[len] = '\\';
-	buf[len+1] = '*';
-	buf[len+2] = NUL;
+	char_u	*p;
+	int		options = WILD_SILENT|WILD_USE_NL|WILD_KEEP_ALL;
+	expand_T	xpc;
 
+	ExpandInit(&xpc);
 	xpc.xp_context = EXPAND_DIRECTORIES;
-	locale_a = ExpandOne(&xpc, buf, NULL, options, WILD_ALL);
-	vim_free(buf);
+	locale_a = ExpandOne(&xpc, (char_u *)"$VIMRUNTIME/lang/*", NULL, options, WILD_ALL);
+	ExpandCleanup(&xpc);
+	p = locale_a;
+	// find the last directory delimiter
+	while (*p != NUL)
+	{
+	    if (*p == '\n')
+		break;
+	    if (*p == '\\')
+		len = p - locale_a;
+	    p++;
+	}
     }
 #endif
 
@@ -1386,6 +1385,12 @@ find_locales(void)
 	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = loc;
 	loc = (char_u *)strtok(NULL, "\n");
     }
+#ifdef MSWIN
+    if (len > 0)
+	// Add C locale to Array (only on Windows)
+	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = vim_strsave((char_u *)"C");
+#endif
+
     vim_free(locale_a);
     if (ga_grow(&locales_ga, 1) == FAIL)
     {
