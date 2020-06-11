@@ -1188,7 +1188,7 @@ set_lang_var(void)
 }
 #endif
 
-#if defined(HAVE_LOCALE_H) || defined(X_LOCALE) \
+#if defined(HAVE_LOCALE_H) || defined(X_LOCALE)
 /*
  * ":language":  Set the language (locale).
  */
@@ -1321,7 +1321,6 @@ ex_language(exarg_T *eap)
 
 static char_u	**locales = NULL;	// Array of all available locales
 
-# ifndef MSWIN
 static int	did_init_locales = FALSE;
 
 /*
@@ -1333,11 +1332,39 @@ find_locales(void)
 {
     garray_T	locales_ga;
     char_u	*loc;
+    char_u	*locale_a;
+    int		len = 0;
+#ifdef MSWIN
+    char_u	*vimruntime;
+    char_u	*buf;
+    int		options = WILD_SILENT|WILD_USE_NL|WILD_KEEP_ALL;
+    expand_T	xpc;
+#endif
 
     // Find all available locales by running command "locale -a".  If this
     // doesn't work we won't have completion.
-    char_u *locale_a = get_cmd_output((char_u *)"locale -a",
+#ifndef MSWIN
+    locale_a = get_cmd_output((char_u *)"locale -a",
 						    NULL, SHELL_SILENT, NULL);
+#else
+    ExpandInit(&xpc);
+    xpc.xp_context = EXPAND_FILES;
+    vimruntime = ExpandOne(&xpc, (char_u *)"$VIMRUNTIME/lang", NULL, options, WILD_ALL);
+    len = STRLEN(vimruntime);
+    buf = alloc(len + 3);
+    if (buf != NULL)
+    {
+	memcpy(buf, vimruntime, len);
+	buf[len] = '\\';
+	buf[len+1] = '*';
+	buf[len+2] = NUL;
+
+	xpc.xp_context = EXPAND_DIRECTORIES;
+	locale_a = ExpandOne(&xpc, buf, NULL, options, WILD_ALL);
+	vim_free(buf);
+    }
+#endif
+
     if (locale_a == NULL)
 	return NULL;
     ga_init2(&locales_ga, sizeof(char_u *), 20);
@@ -1350,6 +1377,8 @@ find_locales(void)
     {
 	if (ga_grow(&locales_ga, 1) == FAIL)
 	    break;
+	if (len > 0)
+	    loc += len + 1;
 	loc = vim_strsave(loc);
 	if (loc == NULL)
 	    break;
@@ -1366,7 +1395,6 @@ find_locales(void)
     ((char_u **)locales_ga.ga_data)[locales_ga.ga_len] = NULL;
     return (char_u **)locales_ga.ga_data;
 }
-# endif
 
 /*
  * Lazy initialization of all available locales.
@@ -1374,13 +1402,16 @@ find_locales(void)
     static void
 init_locales(void)
 {
-#  ifndef MSWIN
     if (!did_init_locales)
     {
 	did_init_locales = TRUE;
 	locales = find_locales();
     }
-#  endif
+#if 0
+    char_u *locale_array[1] = { "C" };
+
+    locales = locale_array;
+#endif
 }
 
 #  if defined(EXITFREE) || defined(PROTO)
