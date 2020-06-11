@@ -1407,11 +1407,6 @@ init_locales(void)
 	did_init_locales = TRUE;
 	locales = find_locales();
     }
-#if 0
-    char_u *locale_array[1] = { "C" };
-
-    locales = locale_array;
-#endif
 }
 
 #  if defined(EXITFREE) || defined(PROTO)
