@@ -1385,10 +1385,10 @@ find_locales(void)
 	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = loc;
 	loc = (char_u *)strtok(NULL, "\n");
     }
+#if 0
 #ifdef MSWIN
-    if (len > 0)
-	// Add C locale to Array (only on Windows)
-	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = vim_strsave((char_u *)"C");
+    ((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = vim_strsave((char_u *)"C");
+#endif
 #endif
 
     vim_free(locale_a);
