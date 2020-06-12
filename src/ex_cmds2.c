@@ -1374,15 +1374,23 @@ find_locales(void)
 
     while (loc != NULL)
     {
+	int ignore = FALSE;
 	if (ga_grow(&locales_ga, 1) == FAIL)
 	    break;
+#ifdef MSWIN
 	if (len > 0)
 	    loc += len + 1;
-	loc = vim_strsave(loc);
-	if (loc == NULL)
-	    break;
+	if (strchr(loc, '.') != NULL)
+	    ignore = TRUE;
+#endif
+	if (!ignore)
+	{
+	    loc = vim_strsave(loc);
+	    if (loc == NULL)
+		break;
 
-	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = loc;
+	    ((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = loc;
+	}
 	loc = (char_u *)strtok(NULL, "\n");
     }
 #if 0
