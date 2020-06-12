@@ -88,6 +88,7 @@ NEW_TESTS = \
 	test_cjk_linebreak \
 	test_clientserver \
 	test_close_count \
+	test_cmdline \
 	test_command_count \
 	test_comparators \
 	test_compiler \

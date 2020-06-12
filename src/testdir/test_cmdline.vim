@@ -5,8 +5,6 @@ source screendump.vim
 source view_util.vim
 source shared.vim
 
-throw 'Skipped: WINDOWS  feature missing'
-
 func Test_complete_tab()
   call writefile(['testfile'], 'Xtestfile')
   call feedkeys(":e Xtest\t\r", "tx")
