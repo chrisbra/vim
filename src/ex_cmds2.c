@@ -1333,7 +1333,9 @@ find_locales(void)
     garray_T	locales_ga;
     char_u	*loc;
     char_u	*locale_a;
+#ifdef MSWIN
     size_t	len = 0;
+#endif
 
     // Find all available locales by running command "locale -a".  If this
     // doesn't work we won't have completion.
