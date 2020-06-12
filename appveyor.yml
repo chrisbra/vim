@@ -31,6 +31,7 @@ test_script:
   - nmake -f Make_dos.mak POSTSCRIPT=yes VIMPROG=..\vim
 
 artifacts:
-  -path: src\gvim.exe
+  - path: src\gvim.exe
+    name: Gvim
 
 # vim: sw=2 sts=2 et ts=8 sr
