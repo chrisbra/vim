@@ -1351,6 +1351,11 @@ find_locales(void)
 	xpc.xp_context = EXPAND_DIRECTORIES;
 	locale_a = ExpandOne(&xpc, (char_u *)"$VIMRUNTIME/lang/*", NULL, options, WILD_ALL);
 	ExpandCleanup(&xpc);
+	if (locale_a == NULL)
+	    // add a dummy input, that will be skipped lated
+	    // but we need to have something in locale_a so that the C locale
+	    // is added at the end
+	    locale_a = vim_strsave((char_u *)".\n");
 	p = locale_a;
 	// find the last directory delimiter
 	while (p != NULL && *p != NUL)
@@ -1374,8 +1379,6 @@ find_locales(void)
     while (loc != NULL)
     {
 	int ignore = FALSE;
-	if (ga_grow(&locales_ga, 1) == FAIL)
-	    break;
 #ifdef MSWIN
 	if (len > 0)
 	    loc += len + 1;
@@ -1385,6 +1388,9 @@ find_locales(void)
 #endif
 	if (!ignore)
 	{
+	    if (ga_grow(&locales_ga, 1) == FAIL)
+		break;
+
 	    loc = vim_strsave(loc);
 	    if (loc == NULL)
 		break;
@@ -1394,7 +1400,9 @@ find_locales(void)
 	loc = (char_u *)strtok(NULL, "\n");
     }
 #ifdef MSWIN
-    ((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = vim_strsave((char_u *)"C");
+    // Add the C locale
+    if (ga_grow(&locales_ga, 1) == OK)
+	((char_u **)locales_ga.ga_data)[locales_ga.ga_len++] = vim_strsave((char_u *)"C");
 #endif
 
     vim_free(locale_a);
