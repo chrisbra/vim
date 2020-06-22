@@ -36,6 +36,7 @@ static int diff_need_update = FALSE; // ex_diffupdate needs to be called
 #define DIFF_HIDDEN_OFF	0x100	// diffoff when hidden
 #define DIFF_INTERNAL	0x200	// use internal xdiff algorithm
 #define DIFF_CLOSE_OFF	0x400	// diffoff when closing window
+#define DIFF_NOFOLD     0x800   // disable folding
 #define ALL_WHITE_DIFF (DIFF_IWHITE | DIFF_IWHITEALL | DIFF_IWHITEEOL)
 static int	diff_flags = DIFF_INTERNAL | DIFF_FILLER | DIFF_CLOSE_OFF;
 
@@ -662,7 +663,7 @@ diff_redraw(
 	{
 	    redraw_win_later(wp, SOME_VALID);
 #ifdef FEAT_FOLDING
-	    if (dofold && foldmethodIsDiff(wp))
+	    if ((diff_flags & DIFF_NOFOLD) && dofold && foldmethodIsDiff(wp))
 		foldUpdateAll(wp);
 #endif
 	    // A change may have made filler lines invalid, need to take care
@@ -1441,10 +1442,13 @@ diff_win_options(
 # ifdef FEAT_FOLDING
     win_T *old_curwin = curwin;
 
-    // close the manually opened folds
-    curwin = wp;
-    newFoldLevel();
-    curwin = old_curwin;
+    if (diff_flags & DIFF_NOFOLD)
+    {
+	// close the manually opened folds
+	curwin = wp;
+	newFoldLevel(FALSE);
+	curwin = old_curwin;
+    }
 # endif
 
     // Use 'scrollbind' and 'cursorbind' when available
@@ -1458,7 +1462,7 @@ diff_win_options(
 	wp->w_p_wrap_save = wp->w_p_wrap;
     wp->w_p_wrap = FALSE;
 # ifdef FEAT_FOLDING
-    if (!wp->w_p_diff)
+    if ((diff_flags & DIFF_NOFOLD) && !wp->w_p_diff)
     {
 	if (wp->w_p_diff_saved)
 	    free_string_option(wp->w_p_fdm_save);
@@ -1520,22 +1524,25 @@ ex_diffoff(exarg_T *eap)
 		if (!wp->w_p_wrap)
 		    wp->w_p_wrap = wp->w_p_wrap_save;
 #ifdef FEAT_FOLDING
-		free_string_option(wp->w_p_fdm);
-		wp->w_p_fdm = vim_strsave(
-		    *wp->w_p_fdm_save ? wp->w_p_fdm_save : (char_u*)"manual");
+		if (diff_flags & DIFF_NOFOLD)
+		{
+		    free_string_option(wp->w_p_fdm);
+		    wp->w_p_fdm = vim_strsave(
+			*wp->w_p_fdm_save ? wp->w_p_fdm_save : (char_u*)"manual");
 
-		if (wp->w_p_fdc == diff_foldcolumn)
-		    wp->w_p_fdc = wp->w_p_fdc_save;
-		if (wp->w_p_fdl == 0)
-		    wp->w_p_fdl = wp->w_p_fdl_save;
+		    if (wp->w_p_fdc == diff_foldcolumn)
+			wp->w_p_fdc = wp->w_p_fdc_save;
+		    if (wp->w_p_fdl == 0)
+			wp->w_p_fdl = wp->w_p_fdl_save;
 
-		// Only restore 'foldenable' when 'foldmethod' is not
-		// "manual", otherwise we continue to show the diff folds.
-		if (wp->w_p_fen)
-		    wp->w_p_fen = foldmethodIsManual(wp) ? FALSE
-							 : wp->w_p_fen_save;
+		    // Only restore 'foldenable' when 'foldmethod' is not
+		    // "manual", otherwise we continue to show the diff folds.
+		    if (wp->w_p_fen)
+			wp->w_p_fen = foldmethodIsManual(wp) ? FALSE
+							     : wp->w_p_fen_save;
 
-		foldUpdateAll(wp);
+		    foldUpdateAll(wp);
+		}
 #endif
 	    }
 	    // remove filler lines
@@ -1855,7 +1862,7 @@ diff_check(win_T *wp, linenr_T lnum)
 
 #ifdef FEAT_FOLDING
     // A closed fold never has filler lines.
-    if (hasFoldingWin(wp, lnum, NULL, NULL, TRUE, NULL))
+    if ((diff_flags & DIFF_NOFOLD) && hasFoldingWin(wp, lnum, NULL, NULL, TRUE, NULL))
 	return 0;
 #endif
 
@@ -2163,7 +2170,8 @@ diff_set_topline(win_T *fromwin, win_T *towin)
 
     check_topfill(towin, FALSE);
 #ifdef FEAT_FOLDING
-    (void)hasFoldingWin(towin, towin->w_topline, &towin->w_topline,
+    if (diff_flags & DIFF_NOFOLD)
+	(void)hasFoldingWin(towin, towin->w_topline, &towin->w_topline,
 							    NULL, TRUE, NULL);
 #endif
 }
@@ -2254,6 +2262,11 @@ diffopt_changed(void)
 	{
 	    p += 8;
 	    diff_flags_new |= DIFF_INTERNAL;
+	}
+	else if (STRNCMP(p, "nofold", 6) == 0)
+	{
+	    p += 6;
+	    diff_flags_new |= DIFF_NOFOLD;
 	}
 	else if (STRNCMP(p, "algorithm:", 10) == 0)
 	{
@@ -2489,7 +2502,7 @@ diff_infold(win_T *wp, linenr_T lnum)
     diff_T	*dp;
 
     // Return if 'diff' isn't set.
-    if (!wp->w_p_diff)
+    if (!wp->w_p_diff || (diff_flags & DIFF_NOFOLD))
 	return FALSE;
 
     for (i = 0; i < DB_COUNT; ++i)
@@ -2830,7 +2843,7 @@ ex_diffgetput(exarg_T *eap)
 	    }
 	    changed_lines(lnum, 0, lnum + count, (long)added);
 
-	    if (dfree != NULL)
+	    if (dfree != NULL && diff_flags & DIFF_NOFOLD)
 	    {
 		// Diff is deleted, update folds in other windows.
 #ifdef FEAT_FOLDING
