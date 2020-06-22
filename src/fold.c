@@ -2096,6 +2096,7 @@ typedef struct
 				// this line
     int		had_end;	// level of fold that is forced to end above
 				// this line (copy of "end" of prev. line)
+    int		diff_skip;	// skip further updates for diffs
 } fline_T;
 
 // Flag is set when redrawing is needed.
@@ -2237,6 +2238,11 @@ foldUpdateIEMS(win_T *wp, linenr_T top, linenr_T bot)
 		break;
 	}
     }
+
+#ifdef FEAT_DIFF
+	if (fline.diff_skip)
+	    return;
+#endif
 
     /*
      * If folding is defined by the syntax, it is possible that a change in
@@ -3241,7 +3247,7 @@ foldlevelIndent(fline_T *flp)
     static void
 foldlevelDiff(fline_T *flp)
 {
-    if (diff_infold(flp->wp, flp->lnum + flp->off))
+    if (diff_infold(flp->wp, flp->lnum + flp->off, &flp->diff_skip))
 	flp->lvl = 1;
     else
 	flp->lvl = 0;

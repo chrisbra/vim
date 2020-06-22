@@ -21,7 +21,7 @@ int diffopt_horizontal(void);
 int diffopt_hiddenoff(void);
 int diffopt_closeoff(void);
 int diff_find_change(win_T *wp, linenr_T lnum, int *startp, int *endp);
-int diff_infold(win_T *wp, linenr_T lnum);
+int diff_infold(win_T *wp, linenr_T lnum, int *skip);
 void nv_diffgetput(int put, long count);
 void ex_diffgetput(exarg_T *eap);
 int diff_mode_buf(buf_T *buf);

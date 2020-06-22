@@ -1446,7 +1446,7 @@ diff_win_options(
     {
 	// close the manually opened folds
 	curwin = wp;
-	newFoldLevel(FALSE);
+	newFoldLevel();
 	curwin = old_curwin;
     }
 # endif
@@ -2494,7 +2494,7 @@ diff_find_change(
  * Return FALSE if there are no diff blocks at all in this window.
  */
     int
-diff_infold(win_T *wp, linenr_T lnum)
+diff_infold(win_T *wp, linenr_T lnum, int *skip)
 {
     int		i;
     int		idx = -1;
@@ -2515,7 +2515,11 @@ diff_infold(win_T *wp, linenr_T lnum)
 
     // return here if there are no diffs in the window
     if (idx == -1 || !other)
+    {
+	if (skip != NULL)
+	    *skip = TRUE;
 	return FALSE;
+    }
 
     if (curtab->tp_diff_invalid)
 	ex_diffupdate(NULL);		// update after a big change
