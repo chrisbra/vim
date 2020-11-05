@@ -96,7 +96,7 @@ func Test_expandcmd()
   unlet $FOO
   let home = expand("~"). '.bar'
   call assert_match(home .. ' '.. home, expandcmd('~/bar ~/bar'))
-  close
+  close!
 endfunc
 
 " Test for expanding <sfile>, <slnum> and <sflnum> outside of sourcing a script
