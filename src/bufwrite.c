@@ -691,6 +691,7 @@ buf_write(
     unsigned int    bkc = get_bkc_value(buf);
     pos_T	    orig_start = buf->b_op_start;
     pos_T	    orig_end = buf->b_op_end;
+    int		    do_patchmode = FALSE;
 
     if (fname == NULL || *fname == NUL)	// safety check
 	return FAIL;
@@ -1290,6 +1291,12 @@ buf_write(
 	    backup_ext = (char_u *)".bak";
 	else
 	    backup_ext = p_bex;
+	// if patch_mode is set, use the patch_mode extension
+	if (*p_pm && dobackup)
+	{
+	    backup_ext = (char_u *)"_";
+	    do_patchmode = TRUE;
+	}
 
 	if (backup_copy
 		&& (fd = mch_open((char *)fname, O_RDONLY | O_EXTRA, 0)) >= 0)
@@ -1345,6 +1352,7 @@ buf_write(
 		    {
 			backup = modname(p, backup_ext, FALSE);
 			vim_free(p);
+			do_patchmode = 2;
 		    }
 #endif
 		rootname = get_file_in_dir(fname, copybuf);
@@ -1553,6 +1561,7 @@ buf_write(
 		    {
 			backup = modname(p, backup_ext, FALSE);
 			vim_free(p);
+			do_patchmode = 2;
 		    }
 #endif
 		if (backup == NULL)
@@ -2411,7 +2420,17 @@ restore_backup:
     // the backup file our 'original' file.
     if (*p_pm && dobackup)
     {
-	char *org = (char *)buf_modname((buf->b_p_sn || buf->b_shortname),
+	char *org;
+
+	if (do_patchmode == 2)
+	{
+	    char_u *backup_o = vim_strsave(backup);
+	    backup_o[STRLEN(backup_o)-1] = NUL;
+	    org = (char *)modname(backup_o, p_pm, FALSE);
+	    vim_free(backup_o);
+	}
+	else
+	    org = (char *)buf_modname((buf->b_p_sn || buf->b_shortname),
 							  fname, p_pm, FALSE);
 
 	if (backup != NULL)
