@@ -1090,6 +1090,16 @@ win_lbr_chartabsize(
 	colnr_T sbrlen = 0;
 	int	numberwidth = win_col_off(wp);
 
+	// long line that does not fit in the window
+	// need to adjust for leading sbr value
+	if (wp->w_skipcol &&
+		wp->w_p_wrap &&
+		col >= wp->w_skipcol &&
+		*sbr != NUL &&
+		col <= wp->w_skipcol + wp->w_width
+		- win_col_off(wp) - MB_CHARLEN(sbr))
+	    col -= (colnr_T)MB_CHARLEN(sbr);
+
 	numberextra = numberwidth;
 	col += numberextra + mb_added;
 	if (col >= (colnr_T)wp->w_width)

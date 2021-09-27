@@ -785,6 +785,16 @@ win_line(
 	v = wp->w_skipcol;
     else
 	v = wp->w_leftcol;
+#if 0
+#ifdef FEAT_LINEBREAK
+    if (wp->w_p_wrap && wp->w_skipcol)
+    {
+	char_u *sbr = get_showbreak_value(wp);
+	if (wp->w_p_wrap && wp->w_skipcol && *sbr != NUL)
+	    v += (int)STRLEN(sbr);
+    }
+#endif
+#endif
     if (v > 0 && !number_only)
     {
 	char_u	*prev_ptr = ptr;
