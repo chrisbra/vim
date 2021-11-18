@@ -694,6 +694,8 @@ buf_write(
     unsigned int    bkc = get_bkc_value(buf);
     pos_T	    orig_start = buf->b_op_start;
     pos_T	    orig_end = buf->b_op_end;
+    int		    use_renameat = FALSE; // make use of renameat2 syscall
+
 
     if (fname == NULL || *fname == NUL)	// safety check
 	return FAIL;
@@ -1591,7 +1593,14 @@ buf_write(
 			    VIM_CLEAR(backup);
 		    }
 		}
-		if (backup != NULL)
+#ifdef HAVE_RENAMEAT2
+		if (backup != NULL && !backup_copy)
+		{
+		    use_renameat = TRUE;
+		    break;
+		}
+#endif
+		if (backup != NULL && !use_renameat)
 		{
 		    // Delete any existing backup and move the current version
 		    // to the backup.	For safety, we don't remove the backup
@@ -1660,9 +1669,20 @@ buf_write(
 #ifdef VMS
     vms_remove_version(fname); // remove version
 #endif
+
     // Default: write the file directly.  May write to a temp file for
-    // multi-byte conversion.
-    wfname = fname;
+    // multi-byte conversion or when using renameat2
+    if (!use_renameat)
+	wfname = fname;
+    else
+    {
+	wfname = vim_tempname('w', FALSE);
+	if (wfname == NULL)
+	{
+	    errmsg = (char_u *)_("E214: Can't find temp file for writing");
+	    goto restore_backup;
+	}
+    }
 
     // Check for forced 'fileencoding' from "++opt=val" argument.
     if (eap != NULL && eap->force_enc != 0)
@@ -1743,7 +1763,8 @@ buf_write(
 	    // When the file needs to be converted with 'charconvert' after
 	    // writing, write to a temp file instead and let the conversion
 	    // overwrite the original file.
-	    if (*p_ccv != NUL)
+	    // if use_renameat is set, we already have a tempfile
+	    if (*p_ccv != NUL && !use_renameat)
 	    {
 		wfname = vim_tempname('w', FALSE);
 		if (wfname == NULL)	// Can't write without a tempfile!
@@ -2264,7 +2285,7 @@ restore_backup:
 	{
 	    // The file was written to a temp file, now it needs to be
 	    // converted with 'charconvert' to (overwrite) the output file.
-	    if (end != 0)
+	    if (end != 0 && *p_ccv != NUL)
 	    {
 		if (eval_charconvert(enc_utf8 ? (char_u *)"utf-8" : p_enc,
 						  fenc, wfname, fname) == FAIL)
@@ -2273,8 +2294,26 @@ restore_backup:
 		    end = 0;
 		}
 	    }
-	    mch_remove(wfname);
-	    vim_free(wfname);
+	    if (use_renameat)
+	    {
+		// Exchange tempfile with fname
+		if (renameat2(AT_FDCWD, (char *)wfname, AT_FDCWD, (char *)fname, RENAME_EXCHANGE) < 0)
+		{
+		    errmsg = (char_u *)_("EXXXX: renameat2 failed");
+		    end = 0;
+		}
+		if (vim_rename(wfname, backup) < 0)
+		{
+		    errmsg = (char_u *)_("EXXXX: vim_rename failed");
+		    end = 0;
+		}
+		vim_free(wfname);
+	    }
+	    else
+	    {
+		mch_remove(wfname);
+		vim_free(wfname);
+	    }
 	}
 #endif
     }
@@ -2341,7 +2380,7 @@ restore_backup:
 		    close(fd);	// ignore errors for closing read file
 		}
 	    }
-	    else
+	    else if (!use_renameat)  // already handled above
 	    {
 		if (vim_rename(backup, fname) == 0)
 		    end = 1;
