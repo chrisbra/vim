@@ -5,6 +5,7 @@ dnl Should also work with autoconf 2.54 and later.
 
 AC_INIT(vim.h)
 AC_CONFIG_HEADER(auto/config.h:config.h.in)
+AC_USE_SYSTEM_EXTENSIONS
 
 dnl Being able to run configure means the system is Unix (compatible).
 AC_DEFINE(UNIX)
@@ -4106,6 +4107,13 @@ AC_MSG_CHECKING(for rename)
 AC_TRY_LINK([#include <stdio.h>], [rename("this", "that")],
 	AC_MSG_RESULT(yes); AC_DEFINE(HAVE_RENAME),
 	AC_MSG_RESULT(no))
+
+dnl check for renameat2
+AC_MSG_CHECKING(for renameat2)
+AC_TRY_LINK(
+[#include <stdio.h>], [renameat2(1, "this", 2, "that", RENAME_EXCHANGE)],
+	AC_MSG_RESULT(yes); AC_DEFINE(HAVE_RENAMEAT2),
+	AC_MSG_RESULT(not usable))
 
 dnl check for dirfd()
 AC_MSG_CHECKING(for dirfd)

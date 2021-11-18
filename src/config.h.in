@@ -187,6 +187,7 @@
 #undef HAVE_QSORT
 #undef HAVE_READLINK
 #undef HAVE_RENAME
+#undef HAVE_RENAMEAT2
 #undef HAVE_SELECT
 #undef HAVE_SELINUX
 #undef HAVE_SETENV
@@ -504,3 +505,6 @@
 
 /* Define if _SC_SIGSTKSZ is available via sysconf() */
 #undef HAVE_SYSCONF_SIGSTKSZ
+
+/* GNU_SOURCE is needed for renameat2 */
+# undef _GNU_SOURCE
