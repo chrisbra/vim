@@ -2294,6 +2294,7 @@ restore_backup:
 		    end = 0;
 		}
 	    }
+#ifdef HAVE_RENAMEAT2
 	    if (use_renameat)
 	    {
 		// Exchange tempfile with fname
@@ -2310,6 +2311,7 @@ restore_backup:
 		vim_free(wfname);
 	    }
 	    else
+#endif
 	    {
 		mch_remove(wfname);
 		vim_free(wfname);
