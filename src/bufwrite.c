@@ -695,6 +695,10 @@ buf_write(
     pos_T	    orig_start = buf->b_op_start;
     pos_T	    orig_end = buf->b_op_end;
     int		    use_renameat = FALSE; // make use of renameat2 syscall
+#ifdef HAVE_RENAMEAT2
+    static int      disable_renameat = FALSE; // renameat2 not usable
+    static int	    check_renameat = TRUE;
+#endif
 
 
     if (fname == NULL || *fname == NUL)	// safety check
@@ -1594,7 +1598,44 @@ buf_write(
 		    }
 		}
 #ifdef HAVE_RENAMEAT2
-		if (backup != NULL && !backup_copy)
+		if (backup != NULL && !backup_copy && !disable_renameat && check_renameat)
+		{
+		    // Check if renameat2 works
+		    stat_T	rst;
+		    int		    fd2;
+
+		    wfname = vim_tempname('w', FALSE);
+		    if (wfname == NULL)
+		    {
+			errmsg = (char_u *)_("E214: Can't find temp file for writing");
+		    }
+		    // renameat2 only works on the same filesystem, so check
+		    fd2 = mch_open((char *)wfname,
+			    O_WRONLY|O_CREAT|O_EXCL|O_EXTRA|O_NOFOLLOW,
+			    0666);
+		    // If we cannot write or the tempfile is on another filesystem,
+		    // disable renameat
+		    if (fd2 < 0 || (mch_lstat((char *)wfname, &rst) == 0
+				&& rst.st_dev != st_old.st_dev))
+		    {
+			if (fd2 > 0)
+			{
+			    close(fd2);
+			    mch_remove(wfname);
+			    vim_free(wfname);
+			}
+			disable_renameat = TRUE;
+			use_renameat = FALSE;
+			check_renameat = FALSE;
+		    }
+		    else
+		    {
+			use_renameat = TRUE;
+			check_renameat = FALSE;
+			break;
+		    }
+		}
+		else if (backup != NULL && !backup_copy && !disable_renameat && !use_renameat && !check_renameat)
 		{
 		    use_renameat = TRUE;
 		    break;
@@ -1674,7 +1715,7 @@ buf_write(
     // multi-byte conversion or when using renameat2
     if (!use_renameat)
 	wfname = fname;
-    else
+    else if (wfname == NULL)
     {
 	wfname = vim_tempname('w', FALSE);
 	if (wfname == NULL)
