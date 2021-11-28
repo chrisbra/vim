@@ -13,6 +13,7 @@
 
 #include "vim.h"
 
+
 #if defined(HAVE_UTIME) && defined(HAVE_UTIME_H)
 # include <utime.h>		// for struct utimbuf
 #endif
@@ -696,8 +697,7 @@ buf_write(
     pos_T	    orig_end = buf->b_op_end;
     int		    use_renameat = FALSE; // make use of renameat2 syscall
 #ifdef HAVE_RENAMEAT2
-    static int      disable_renameat = FALSE; // renameat2 not usable
-    static int	    check_renameat = TRUE;
+    int             fd2;
 #endif
 
 
@@ -1597,6 +1597,7 @@ buf_write(
 			    VIM_CLEAR(backup);
 		    }
 		}
+#if 0
 #ifdef HAVE_RENAMEAT2
 		if (backup != NULL && !backup_copy && !disable_renameat && check_renameat)
 		{
@@ -1641,7 +1642,8 @@ buf_write(
 		    break;
 		}
 #endif
-		if (backup != NULL && !use_renameat)
+#endif
+		if (backup != NULL)
 		{
 		    // Delete any existing backup and move the current version
 		    // to the backup.	For safety, we don't remove the backup
@@ -1650,6 +1652,27 @@ buf_write(
 
 		    // If the renaming of the original file to the backup file
 		    // works, quit here.
+#ifdef HAVE_RENAMEAT2
+		    if (!backup_copy)
+		    {
+			int result = -1;
+
+			// when backup_copy = FALSE, backup does not exist yet
+			fd2 = mch_open((char *)backup, O_WRONLY | O_EXTRA | O_CREAT | O_NOFOLLOW,
+				perm < 0 ? 0666 : (perm & 0777));
+			if (fd2 > 0)
+			{
+			    // Test if renameat2 works
+			    result = renameat2(AT_FDCWD, (char *)fname, AT_FDCWD, (char *)backup, RENAME_EXCHANGE);
+			    if (result == 0)
+			    {
+				use_renameat = result == 0;
+				close(fd2);
+				break;
+			    }
+			}
+		    }
+#endif
 		    if (vim_rename(fname, backup) == 0)
 			break;
 
@@ -1712,18 +1735,14 @@ buf_write(
 #endif
 
     // Default: write the file directly.  May write to a temp file for
-    // multi-byte conversion or when using renameat2
-    if (!use_renameat)
+    // multi-byte conversion
+#ifdef HAVE_RENAMEAT2
+    if (use_renameat)
+	wfname = backup;
+    else
+#endif
 	wfname = fname;
-    else if (wfname == NULL)
-    {
-	wfname = vim_tempname('w', FALSE);
-	if (wfname == NULL)
-	{
-	    errmsg = (char_u *)_("E214: Can't find temp file for writing");
-	    goto restore_backup;
-	}
-    }
+
 
     // Check for forced 'fileencoding' from "++opt=val" argument.
     if (eap != NULL && eap->force_enc != 0)
@@ -1805,7 +1824,7 @@ buf_write(
 	    // writing, write to a temp file instead and let the conversion
 	    // overwrite the original file.
 	    // if use_renameat is set, we already have a tempfile
-	    if (*p_ccv != NUL && !use_renameat)
+	    if (*p_ccv != NUL && wfname == fname)
 	    {
 		wfname = vim_tempname('w', FALSE);
 		if (wfname == NULL)	// Can't write without a tempfile!
@@ -1940,6 +1959,13 @@ restore_backup:
 			    vim_rename(backup, fname);
 			}
 		    }
+#ifdef HAVE_RENAMEAT2
+		    if (use_renameat)
+		    {
+			renameat2(AT_FDCWD, (char *)fname, AT_FDCWD, (char *)backup, RENAME_EXCHANGE);
+			end = 0;
+		    }
+#endif
 
 		    // if original file no longer exists give an extra warning
 		    if (!newfile && mch_stat((char *)fname, &st) < 0)
@@ -2249,7 +2275,7 @@ restore_backup:
 
 #if defined(HAVE_SELINUX) || defined(HAVE_SMACK)
 	// Probably need to set the security context.
-	if (!backup_copy)
+	if (backup_copy)
 	    mch_copy_sec(backup, wfname);
 #endif
 
@@ -2334,29 +2360,26 @@ restore_backup:
 		    write_info.bw_conv_error = TRUE;
 		    end = 0;
 		}
+		mch_remove(wfname);
+		vim_free(wfname);
 	    }
 #ifdef HAVE_RENAMEAT2
-	    if (use_renameat)
+	    else if (use_renameat && end != 0)
 	    {
-		// Exchange tempfile with fname
+		// Exchange backupfile with fname
 		if (renameat2(AT_FDCWD, (char *)wfname, AT_FDCWD, (char *)fname, RENAME_EXCHANGE) < 0)
 		{
 		    errmsg = (char_u *)_("EXXXX: renameat2 failed");
 		    end = 0;
 		}
-		if (vim_rename(wfname, backup) < 0)
+		else
 		{
-		    errmsg = (char_u *)_("EXXXX: vim_rename failed");
-		    end = 0;
+		    mch_remove(wfname);
+		    backup = NULL;
 		}
 		vim_free(wfname);
 	    }
-	    else
 #endif
-	    {
-		mch_remove(wfname);
-		vim_free(wfname);
-	    }
 	}
 #endif
     }
