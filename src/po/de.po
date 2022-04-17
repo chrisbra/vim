@@ -49,6 +49,7 @@ msgstr "E905: Unbekannter Befehl empfangen: %s."
 msgid "E912: cannot use ch_evalexpr()/ch_sendexpr() with a raw or nl channel"
 msgstr "E912: Kann ch_evalexpr()/ch_sendexpr() nicht mit einem Raw oder NL Channel 
 benutzen."
+benutzen."
 
 msgid "E906: not an open channel"
 msgstr "E906: Kein offener Channel"
@@ -242,6 +243,7 @@ msgid ""
 "E513: write error, conversion failed in line %ld (make 'fenc' empty to "
 "override)"
 msgstr "E513: Schreibfehler, Konvertierung in Zeile %ld fehlgeschlagen (leere 'fenc' 
+um es zu erzwingen)"
 um es zu erzwingen)"
 
 msgid "E514: write error (file system full?)"
@@ -438,6 +440,7 @@ msgstr "--noplugin\t\tlade keine \plugin\-Skripte"
 msgid "--remote-silent <files>  Same, don't complain if there is no server"
 msgstr "--remote-silent <Dateien>  Dasselbe ohne Warnung, wenn kein Server vorhanden 
 ist"
+ist"
 
 
 msgid ""
@@ -542,6 +545,7 @@ msgid ""
 "E883: search pattern and expression register may not contain two or more "
 "lines"
 msgstr "E883: Suchmuster- und Ausdrucksregister dürfen nicht mehr als 1 Zeile 
+enthalten."
 enthalten."
 
 
