@@ -1117,6 +1117,9 @@ EXTERN int	allbuf_lock INIT(= 0);
 				// changed, no buffer can be deleted and
 				// current directory can't be changed.
 				// Used for SwapExists et al.
+EXTERN int	is_bracketed_paste_mode INIT(= 0);
+				// non-zero when reading input buffer from
+				// bracketed paste mode (matters for Ctrl-C)
 #ifdef HAVE_SANDBOX
 EXTERN int	sandbox INIT(= 0);
 				// Non-zero when evaluating an expression in a

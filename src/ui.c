@@ -966,13 +966,23 @@ fill_input_buf(int exit_on_error UNUSED)
 #  else
 	len = read(read_cmd_fd, (char *)inbuf + inbufcount, readlen);
 #  endif
-#  ifdef FEAT_EVAL
 	if (len > 0)
 	{
 	    inbuf[inbufcount + len] = NUL;
+	    {
+		char_u *p = NULL;
+		char_u *q = NULL;
+		p = find_termcode((char_u *)"PS");
+		q = find_termcode((char_u *)"PE");
+		if (p != NULL && len >= STRLEN(p) && STRNCMP(inbuf + inbufcount, p, STRLEN(p)) == 0)
+		    is_bracketed_paste_mode = TRUE;
+		if (q != NULL && len >= STRLEN(q) && STRNCMP(inbuf + inbufcount, q, STRLEN(q)) == 0)
+		    is_bracketed_paste_mode = FALSE;
+	    }
+#  ifdef FEAT_EVAL
 	    ch_log(NULL, "raw key input: \"%s\"", inbuf + inbufcount);
-	}
 #  endif
+	}
 
 	if (len > 0 || got_int)
 	    break;
@@ -1032,7 +1042,7 @@ fill_input_buf(int exit_on_error UNUSED)
 	    // If a CTRL-C was typed, remove it from the buffer and set
 	    // got_int.  Also recognize CTRL-C with modifyOtherKeys set, lower
 	    // and upper case, in two forms.
-	    if (ctrl_c_interrupts && (inbuf[inbufcount] == 3
+	    if ((ctrl_c_interrupts && (inbuf[inbufcount] == 3
 			|| (len >= 10 && STRNCMP(inbuf + inbufcount,
 						   "\033[27;5;99~", 10) == 0)
 			|| (len >= 10 && STRNCMP(inbuf + inbufcount,
@@ -1040,7 +1050,8 @@ fill_input_buf(int exit_on_error UNUSED)
 			|| (len >= 7 && STRNCMP(inbuf + inbufcount,
 						       "\033[99;5u", 7) == 0)
 			|| (len >= 7 && STRNCMP(inbuf + inbufcount,
-						       "\033[67;5u", 7) == 0)))
+						       "\033[67;5u", 7) == 0))) &&
+		    !is_bracketed_paste_mode)
 	    {
 		// remove everything typed before the CTRL-C
 		mch_memmove(inbuf, inbuf + inbufcount, (size_t)(len));
