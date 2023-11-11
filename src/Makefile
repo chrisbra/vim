@@ -608,7 +608,7 @@ FORTIFY_CFLAGS = -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1
 #CFLAGS = -g -O2 -fno-strength-reduce -Wall -Wmissing-prototypes $(FORTIFY_CFLAGS)
 #CFLAGS = -g -Wall -Wmissing-prototypes
 #CFLAGS = -O6 -fno-strength-reduce -Wall -Wshadow -Wmissing-prototypes $(FORTIFY_CFLAGS)
-#CFLAGS = -g -DDEBUG -Wall -Wshadow -Wmissing-prototypes
+CFLAGS = -g -DDEBUG -Wall -Wshadow -Wmissing-prototypes
 #CFLAGS = -g -O2 '-DSTARTUPTIME="vimstartup"' -fno-strength-reduce -Wall -Wmissing-prototypes $(FORTIFY_CFLAGS)
 
 # Use this with GCC to check for mistakes, unused arguments, etc.
