@@ -380,6 +380,8 @@ jobs:
           if clang --version | grep -qs 'Apple clang version \(1[3-9]\|[2-9]\)\.'; then
             sed -i.bak -f ci/config.mk.clang-12.sed ${SRCDIR}/auto/config.mk
           fi
+          # enabling debug mode breaks MacOS CI, cannot find header sodium.h, WTF?
+          sed -i.bak -e "s/^CFLAGS =/#&/g" ${SRCDIR}/Makefile
 
       - name: Build
         env:
