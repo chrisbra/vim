@@ -54,8 +54,8 @@ hi! link Structure Type
 hi! link Tag Special
 hi! link Typedef Type
 hi! link Debug Special
-hi! link diffAdded String
-hi! link diffRemoved WarningMsg
+hi! link Added String
+hi! link Removed WarningMsg
 hi! link diffOnly WarningMsg
 hi! link diffNoEOL WarningMsg
 hi! link diffIsA WarningMsg
@@ -162,8 +162,8 @@ if s:t_Co >= 256
   hi! link Tag Special
   hi! link Typedef Type
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg

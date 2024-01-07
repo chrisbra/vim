@@ -28,8 +28,8 @@ hi! link CursorIM Cursor
 hi! link LineNrAbove LineNr
 hi! link LineNrBelow LineNr
 hi! link Debug Special
-hi! link diffAdded String
-hi! link diffRemoved WarningMsg
+hi! link Added String
+hi! link Removed WarningMsg
 hi! link diffOnly WarningMsg
 hi! link diffNoEOL WarningMsg
 hi! link diffIsA WarningMsg
@@ -136,8 +136,8 @@ if s:t_Co >= 256
   hi! link LineNrAbove LineNr
   hi! link LineNrBelow LineNr
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg
@@ -247,8 +247,8 @@ if s:t_Co >= 16
   hi! link LineNrAbove LineNr
   hi! link LineNrBelow LineNr
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg

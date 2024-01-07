@@ -106,8 +106,8 @@ hi Ignore guifg=NONE guibg=NONE gui=NONE ctermfg=NONE ctermbg=NONE cterm=NONE
 hi Debug guifg=#5f8787 guibg=NONE gui=NONE cterm=NONE
 hi DiffAdd guifg=#dadada guibg=#5f875f gui=NONE cterm=NONE
 hi DiffDelete guifg=#af875f guibg=NONE gui=NONE cterm=NONE
-hi diffAdded guifg=#87af87 guibg=NONE gui=NONE cterm=NONE
-hi diffRemoved guifg=#d75f5f guibg=NONE gui=NONE cterm=NONE
+hi Added guifg=#87af87 guibg=NONE gui=NONE cterm=NONE
+hi Removed guifg=#d75f5f guibg=NONE gui=NONE cterm=NONE
 hi diffSubname guifg=#af87af guibg=NONE gui=NONE cterm=NONE
 hi DiffText guifg=#dadada guibg=#878787 gui=NONE cterm=NONE
 hi DiffChange guifg=#bcbcbc guibg=#5f5f5f gui=NONE cterm=NONE
@@ -199,8 +199,8 @@ if s:t_Co >= 256
   hi Debug ctermfg=66 ctermbg=NONE cterm=NONE
   hi DiffAdd ctermfg=253 ctermbg=65 cterm=NONE
   hi DiffDelete ctermfg=137 ctermbg=NONE cterm=NONE
-  hi diffAdded ctermfg=108 ctermbg=NONE cterm=NONE
-  hi diffRemoved ctermfg=167 ctermbg=NONE cterm=NONE
+  hi Added ctermfg=108 ctermbg=NONE cterm=NONE
+  hi Removed ctermfg=167 ctermbg=NONE cterm=NONE
   hi diffSubname ctermfg=139 ctermbg=NONE cterm=NONE
   hi DiffText ctermfg=253 ctermbg=102 cterm=NONE
   hi DiffChange ctermfg=250 ctermbg=59 cterm=NONE
@@ -277,8 +277,8 @@ if s:t_Co >= 16
   hi Debug ctermfg=darkcyan ctermbg=NONE cterm=NONE
   hi DiffAdd ctermfg=white ctermbg=darkgreen cterm=NONE
   hi DiffDelete ctermfg=darkyellow ctermbg=NONE cterm=NONE
-  hi diffAdded ctermfg=darkgreen ctermbg=NONE cterm=NONE
-  hi diffRemoved ctermfg=darkred ctermbg=NONE cterm=NONE
+  hi Added ctermfg=darkgreen ctermbg=NONE cterm=NONE
+  hi Removed ctermfg=darkred ctermbg=NONE cterm=NONE
   hi diffSubname ctermfg=darkmagenta ctermbg=NONE cterm=NONE
   hi DiffText ctermfg=white ctermbg=lightgrey cterm=NONE
   hi DiffChange ctermfg=white ctermbg=darkgray cterm=NONE
@@ -355,8 +355,8 @@ if s:t_Co >= 8
   hi Debug ctermfg=darkcyan ctermbg=NONE cterm=NONE
   hi DiffAdd ctermfg=white ctermbg=darkgreen cterm=NONE
   hi DiffDelete ctermfg=darkyellow ctermbg=NONE cterm=NONE
-  hi diffAdded ctermfg=darkgreen ctermbg=NONE cterm=NONE
-  hi diffRemoved ctermfg=darkred ctermbg=NONE cterm=NONE
+  hi Added ctermfg=darkgreen ctermbg=NONE cterm=NONE
+  hi Removed ctermfg=darkred ctermbg=NONE cterm=NONE
   hi diffSubname ctermfg=darkmagenta ctermbg=NONE cterm=NONE
   hi DiffText ctermfg=white ctermbg=black cterm=bold,reverse
   hi DiffChange ctermfg=black ctermbg=white cterm=NONE

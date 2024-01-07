@@ -76,8 +76,8 @@ hi Underlined guifg=NONE guibg=NONE gui=underline ctermfg=NONE ctermbg=NONE cter
 hi Label guifg=#ffd700 guibg=NONE gui=NONE cterm=NONE
 hi! link Terminal Normal
 hi! link Debug Special
-hi! link diffAdded String
-hi! link diffRemoved WarningMsg
+hi! link Added String
+hi! link Removed WarningMsg
 hi! link diffOnly WarningMsg
 hi! link diffNoEOL WarningMsg
 hi! link diffIsA WarningMsg
@@ -186,8 +186,8 @@ if s:t_Co >= 256
   hi Label ctermfg=220 ctermbg=NONE cterm=NONE
   hi! link Terminal Normal
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg
@@ -299,8 +299,8 @@ if s:t_Co >= 16
   hi Label ctermfg=yellow ctermbg=NONE cterm=NONE
   hi! link Terminal Normal
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg
@@ -411,8 +411,8 @@ if s:t_Co >= 8
   hi Label ctermfg=yellow ctermbg=NONE cterm=NONE
   hi! link Terminal Normal
   hi! link Debug Special
-  hi! link diffAdded String
-  hi! link diffRemoved WarningMsg
+  hi! link Added String
+  hi! link Removed WarningMsg
   hi! link diffOnly WarningMsg
   hi! link diffNoEOL WarningMsg
   hi! link diffIsA WarningMsg

@@ -93,8 +93,8 @@ if &background ==# 'dark'
   hi DiffChange guifg=#d0d0d0 guibg=#5f5f5f gui=NONE cterm=NONE
   hi DiffText guifg=#afffff guibg=#5f8787 gui=NONE cterm=NONE
   hi DiffDelete guifg=#ffafaf guibg=#875f5f gui=NONE cterm=NONE
-  hi diffAdded guifg=#00af5f guibg=NONE gui=NONE cterm=NONE
-  hi diffRemoved guifg=#d7005f guibg=NONE gui=NONE cterm=NONE
+  hi Added guifg=#00af5f guibg=NONE gui=NONE cterm=NONE
+  hi Removed guifg=#d7005f guibg=NONE gui=NONE cterm=NONE
 else
   " Light background
   if (has('termguicolors') && &termguicolors) || has('gui_running')
@@ -167,8 +167,8 @@ else
   hi DiffChange guifg=#262626 guibg=#dadada gui=NONE cterm=NONE
   hi DiffText guifg=#005f5f guibg=#afd7d7 gui=NONE cterm=NONE
   hi DiffDelete guifg=#875f5f guibg=#ffd7d7 gui=NONE cterm=NONE
-  hi diffAdded guifg=#008700 guibg=NONE gui=NONE cterm=NONE
-  hi diffRemoved guifg=#d70000 guibg=NONE gui=NONE cterm=NONE
+  hi Added guifg=#008700 guibg=NONE gui=NONE cterm=NONE
+  hi Removed guifg=#d70000 guibg=NONE gui=NONE cterm=NONE
 endif
 
 if s:t_Co >= 256
@@ -247,8 +247,8 @@ if s:t_Co >= 256
     hi DiffChange ctermfg=252 ctermbg=59 cterm=NONE
     hi DiffText ctermfg=159 ctermbg=66 cterm=NONE
     hi DiffDelete ctermfg=217 ctermbg=95 cterm=NONE
-    hi diffAdded ctermfg=35 ctermbg=NONE cterm=NONE
-    hi diffRemoved ctermfg=161 ctermbg=NONE cterm=NONE
+    hi Added ctermfg=35 ctermbg=NONE cterm=NONE
+    hi Removed ctermfg=161 ctermbg=NONE cterm=NONE
   else
     " Light background
     hi Normal ctermfg=16 ctermbg=231 cterm=NONE
@@ -316,8 +316,8 @@ if s:t_Co >= 256
     hi DiffChange ctermfg=235 ctermbg=253 cterm=NONE
     hi DiffText ctermfg=23 ctermbg=152 cterm=NONE
     hi DiffDelete ctermfg=95 ctermbg=224 cterm=NONE
-    hi diffAdded ctermfg=28 ctermbg=NONE cterm=NONE
-    hi diffRemoved ctermfg=160 ctermbg=NONE cterm=NONE
+    hi Added ctermfg=28 ctermbg=NONE cterm=NONE
+    hi Removed ctermfg=160 ctermbg=NONE cterm=NONE
   endif
   unlet s:t_Co
   finish
@@ -390,8 +390,8 @@ if s:t_Co >= 16
     hi DiffChange ctermfg=black ctermbg=lightgray cterm=NONE
     hi DiffText ctermfg=black ctermbg=cyan cterm=NONE
     hi DiffDelete ctermfg=black ctermbg=darkred cterm=NONE
-    hi diffAdded ctermfg=darkgreen ctermbg=NONE cterm=NONE
-    hi diffRemoved ctermfg=darkred ctermbg=NONE cterm=NONE
+    hi Added ctermfg=darkgreen ctermbg=NONE cterm=NONE
+    hi Removed ctermfg=darkred ctermbg=NONE cterm=NONE
   else
     " Light background
     hi Normal ctermfg=black ctermbg=white cterm=NONE
@@ -459,8 +459,8 @@ if s:t_Co >= 16
     hi DiffChange ctermfg=black ctermbg=lightgray cterm=NONE
     hi DiffText ctermfg=black ctermbg=cyan cterm=NONE
     hi DiffDelete ctermfg=black ctermbg=darkred cterm=NONE
-    hi diffAdded ctermfg=darkgreen ctermbg=NONE cterm=NONE
-    hi diffRemoved ctermfg=red ctermbg=NONE cterm=NONE
+    hi Added ctermfg=darkgreen ctermbg=NONE cterm=NONE
+    hi Removed ctermfg=red ctermbg=NONE cterm=NONE
   endif
   unlet s:t_Co
   finish
