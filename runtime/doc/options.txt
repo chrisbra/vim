@@ -1,4 +1,4 @@
-*options.txt*	For Vim version 9.1.  Last change: 2024 Feb 24
+*options.txt*	For Vim version 9.1.  Last change: 2024 Mar 05
 
 
 		  VIM REFERENCE MANUAL	  by Bram Moolenaar
@@ -4929,11 +4929,13 @@ A jump table for the options with a short description can be found at |Q_op|.
 'jumpoptions' 'jop'	string	(default "")
 			global
 	List of words that change the behavior of the |jumplist|.
-	  stack         Make the jumplist behave like the tagstack.
+	  stack 	Make the jumplist behave like the tagstack.
 			Relative location of entries in the jumplist is
 			preserved at the cost of discarding subsequent entries
 			when navigating backwards in the jumplist and then
 			jumping to a location.  |jumplist-stack|
+	  center	Centers the cursor, if it moves out of the current
+			window view (applies also to the |changelist|).
 
 							*'key'*
 'key'			string	(default "")

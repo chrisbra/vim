@@ -5393,9 +5393,27 @@ nv_pcmark(cmdarg_T *cap)
     {
 	curwin->w_set_curswant = TRUE;
 	check_cursor();
+	if ((pos->lnum < curwin->w_topline ||
+	    pos->lnum > curwin->w_botline) &&
+	    jop_flags & JOP_CENTER)
+	{
+	    scroll_cursor_halfway(TRUE, FALSE);
+	    redraw_later(UPD_VALID);
+	    set_fraction(curwin);
+	}
     }
     else if (pos != NULL)		    // can jump
+    {
 	nv_cursormark(cap, FALSE, pos);
+	if ((pos->lnum < curwin->w_topline ||
+	    pos->lnum > curwin->w_botline) &&
+	    jop_flags & JOP_CENTER)
+	{
+	    scroll_cursor_halfway(TRUE, FALSE);
+	    redraw_later(UPD_VALID);
+	    set_fraction(curwin);
+	}
+    }
     else if (cap->cmdchar == 'g')
     {
 	if (curbuf->b_changelistlen == 0)

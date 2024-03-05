@@ -52,7 +52,7 @@ static char *(p_cmp_values[]) = {"internal", "keepascii", NULL};
 static char *(p_culopt_values[]) = {"line", "screenline", "number", "both", NULL};
 #endif
 static char *(p_dy_values[]) = {"lastline", "truncate", "uhex", NULL};
-static char *(p_jop_values[]) = {"stack", NULL};
+static char *(p_jop_values[]) = {"stack", "center", NULL};
 #ifdef FEAT_FOLDING
 static char *(p_fdo_values[]) = {"all", "block", "hor", "mark", "percent",
 				 "quickfix", "search", "tag", "insert",
