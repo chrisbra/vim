@@ -4695,6 +4695,7 @@ typedef struct
 #ifdef FEAT_DIFF
     int		diff_mode;		// start with 'diff' set
 #endif
+    int		load_defaults;		// [no-]load-defaults
 } mparm_T;
 
 /*
