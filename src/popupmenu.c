@@ -1261,6 +1261,17 @@ pum_in_same_position(void)
 		&& pum_win_width == curwin->w_width);
 }
 
+    int
+pum_over_cmdline(void)
+{
+    if (!pum_visible())
+	return FALSE;
+    if (pum_win_row + pum_height >= cmdline_row)
+	return TRUE;
+    return FALSE;
+}
+
+
 /*
  * Return TRUE when pum_may_redraw() will call pum_redraw().
  * This means that the pum area should not be overwritten to avoid flicker.

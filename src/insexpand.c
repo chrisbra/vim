@@ -2380,6 +2380,8 @@ ins_compl_stop(int c, int prev_mode, int retval)
     // ctrl_x_mode, so that complete_info() can be used.
     ctrl_x_mode = prev_mode;
     ins_apply_autocmds(EVENT_COMPLETEDONEPRE);
+    if (c == ESC && pum_over_cmdline())
+	ins_redraw(FALSE);
 
     ins_compl_free();
     compl_started = FALSE;
