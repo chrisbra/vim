@@ -514,12 +514,14 @@ set_arglist(char_u *str)
 /*
  * Return TRUE if window "win" is editing the file at the current argument
  * index.
+ * Be careful, the buffer in the window could have been freed
  */
     int
 editing_arg_idx(win_T *win)
 {
     return !(win->w_arg_idx >= WARGCOUNT(win)
-		|| (win->w_buffer->b_fnum
+		|| (buf_valid(win->w_buffer)
+		    && win->w_buffer->b_fnum
 				      != WARGLIST(win)[win->w_arg_idx].ae_fnum
 		    && (win->w_buffer->b_ffname == NULL
 			 || !(fullpathcmp(
@@ -543,6 +545,7 @@ check_arg_idx(win_T *win)
 		&& ALIST(win) == &global_alist
 		&& GARGCOUNT > 0
 		&& win->w_arg_idx < GARGCOUNT
+		&& buf_valid(win->w_buffer)
 		&& (win->w_buffer->b_fnum == GARGLIST[GARGCOUNT - 1].ae_fnum
 		    || (win->w_buffer->b_ffname != NULL
 			&& (fullpathcmp(alist_name(&GARGLIST[GARGCOUNT - 1]),
