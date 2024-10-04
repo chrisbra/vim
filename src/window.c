@@ -2876,10 +2876,6 @@ win_close(win_T *win, int free_buf)
 	    }
 	}
 #endif
-	// Safety check: this should not happen
-	// if the buffer is no longer valid, go to lastbuf, which is hopefully okay
-	if (!buf_valid(curwin->w_buffer))
-	    enter_buffer(lastbuf);
 	curbuf = curwin->w_buffer;
 	close_curwin = TRUE;
 

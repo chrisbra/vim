@@ -33,6 +33,7 @@
 # define MAX_STL_EVAL_DEPTH 100
 #endif
 
+static void	enter_buffer(buf_T *buf);
 static void	buflist_getfpos(void);
 static char_u	*buflist_match(regmatch_T *rmp, buf_T *buf, int ignore_case);
 static char_u	*fname_match(regmatch_T *rmp, char_u *name, int ignore_case);
@@ -1914,7 +1915,7 @@ set_curbuf(buf_T *buf, int action)
  * Old curbuf must have been abandoned already!  This also means "curbuf" may
  * be pointing to freed memory.
  */
-    void
+    static void
 enter_buffer(buf_T *buf)
 {
     // when closing the current buffer stop Visual mode
