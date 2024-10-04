@@ -2739,6 +2739,10 @@ do_ecmd(
 	    // autocommands may change curwin and curbuf
 	    if (oldwin != NULL)
 		oldwin = curwin;
+	    // autocommands try to edit a file that is goind to be removed,
+	    // abort
+	    if (buf != NULL && buf->b_locked_split)
+		goto theend;
 	    set_bufref(&old_curbuf, curbuf);
 	}
 	if (buf == NULL)
