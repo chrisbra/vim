@@ -4884,7 +4884,8 @@ func Test_GuiEnter_Turkish_locale()
 endfunc
 
 " This was using freed memory
-func Test_BufWinLeave_with_vsp()
+func Test_autocmd_BufWinLeave_with_vsp()
+  new
   let fname = 'XXXBufWinLeaveUAF.txt'
   let dummy = 'XXXDummy.txt'
   call writefile([], fname)
@@ -4893,10 +4894,12 @@ func Test_BufWinLeave_with_vsp()
   defer delete(dummy)
   exe "e " fname
   vsp
-  exe "au BufWinLeave " .. fname .. " :e " dummy .. "| vsp " .. fname
+  augroup testing
+    exe "au BufWinLeave " .. fname .. " :e " dummy .. "| vsp " .. fname
+  augroup END
   bw
-  au! BufWinLeave
-  bw
+  call CleanUpTestAuGroup()
+  exe "bw! " .. dummy
 endfunc
 
 " vim: shiftwidth=2 sts=2 expandtab
