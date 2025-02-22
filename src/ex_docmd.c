@@ -10218,21 +10218,42 @@ ex_filetype(exarg_T *eap)
 }
 
 /*
- * ":setfiletype [FALLBACK] {name}"
+ * ":setfiletype [FALLBACK|SECONDARY] {name}"
  */
     static void
 ex_setfiletype(exarg_T *eap)
 {
-    if (curbuf->b_did_filetype)
+    int is_secondary = FALSE;
+    char_u buf2[MAXPATHL];
+
+    if (curbuf->b_did_filetype > 0)
 	return;
 
     char_u *arg = eap->arg;
     if (STRNCMP(arg, "FALLBACK ", 9) == 0)
 	arg += 9;
 
+    else if (STRNCMP(arg, "SECONDARY ", 10) == 0)
+    {
+	is_secondary = TRUE;
+	arg += 10;
+    }
+
+    if (curbuf->b_did_filetype < 0)
+    {
+	vim_snprintf((char *)buf2, MAXPATHL, "%s.%s",
+		curbuf->b_p_ft, arg);
+	arg = buf2;
+    }
+
     set_option_value_give_err((char_u *)"filetype", 0L, arg, OPT_LOCAL);
-    if (arg != eap->arg)
-	curbuf->b_did_filetype = FALSE;
+    if (arg != eap->arg && arg != buf2)
+    {
+	if (is_secondary)
+	    curbuf->b_did_filetype = -1;
+	else
+	    curbuf->b_did_filetype = FALSE;
+    }
 }
 
     static void

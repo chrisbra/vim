@@ -84,4 +84,4 @@ hi def link jinjaString Constant
 hi def link jinjaNumber Constant
 hi def link jinjaComment Comment
 
-let b:current_syntax = 'jinja'
+"let b:current_syntax = 'jinja'

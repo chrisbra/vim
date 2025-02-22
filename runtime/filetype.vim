@@ -1,7 +1,7 @@
 " Vim support file to detect file types
 "
 " Maintainer:	The Vim Project <https://github.com/vim/vim>
-" Last Change:	2025 Feb 08
+" Last Change:	2025 Feb 22
 " Former Maintainer:	Bram Moolenaar <Bram@vim.org>
 
 " Listen very carefully, I will say this only once
@@ -19,6 +19,10 @@ augroup filetypedetect
 " Ignored extensions
 if exists("*fnameescape")
 au BufNewFile,BufRead ?\+.orig,?\+.bak,?\+.old,?\+.new,?\+.dpkg-dist,?\+.dpkg-old,?\+.dpkg-new,?\+.dpkg-bak,?\+.rpmsave,?\+.rpmnew,?\+.pacsave,?\+.pacnew
+	\ exe "doau filetypedetect BufRead " . fnameescape(expand("<afile>:r"))
+" composed/dotted filetype
+au BufNewFile,BufRead ?\+.jinja
+	\ setf SECONDARY jinja |
 	\ exe "doau filetypedetect BufRead " . fnameescape(expand("<afile>:r"))
 au BufNewFile,BufRead *~
 	\ let s:name = expand("<afile>") |
@@ -1686,7 +1690,7 @@ au BufNewFile,BufRead *.nginx,nginx*.conf,*nginx.conf,*/etc/nginx/*,*/usr/local/
 au BufNewFile,BufRead *.nim,*.nims,*.nimble	setf nim
 
 " Ninja file
-au BufNewFile,BufRead *.ninja			setf ninja
+"au BufNewFile,BufRead *.ninja			setf ninja
 
 " Nix
 au BufRead,BufNewFile *.nix			setf nix

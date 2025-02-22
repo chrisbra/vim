@@ -1,4 +1,4 @@
-*options.txt*	For Vim version 9.1.  Last change: 2025 Feb 16
+*options.txt*	For Vim version 9.1.  Last change: 2025 Feb 22
 
 
 		  VIM REFERENCE MANUAL	  by Bram Moolenaar
@@ -475,7 +475,7 @@ context of where it was defined.
 
 Setting the filetype
 
-:setf[iletype] [FALLBACK] {filetype}			*:setf* *:setfiletype*
+:setf[iletype] [FALLBACK]|[SECONDARY] {filetype}	*:setf* *:setfiletype*
 			Set the 'filetype' option to {filetype}, but only if
 			not done yet in a sequence of (nested) autocommands.
 			This is short for: >
@@ -491,6 +491,19 @@ Setting the filetype
 			'filetype'.  This is to be used for filetype
 			detections that are just a guess.  |did_filetype()|
 			will return false after this command.
+
+			When the optional SECONDARY argument is present, a
+			later :setfiletype command will create a "dotted"
+			'filetype', that is a combination of both filetypes.
+			This is to be used for filetypes that can apply to
+			many additional filetypes, like templating engines.
+			So this example sets the filetype to "jinja.html": >
+
+			setfiletype SECONDARY jinja
+			" later on another filetype is detected
+			setfiletype html
+<
+			|did_filetype()| will return false after this command.
 
 				*option-window* *optwin*
 :bro[wse] se[t]			*:set-browse* *:browse-set* *:opt* *:options*
