@@ -4,6 +4,13 @@ on:
   push:
     branches: ['**']
   pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 # Cancels all previous workflow runs for pull requests that have not completed.
 concurrency:
@@ -272,6 +279,14 @@ jobs:
         timeout-minutes: 25
         run: |
           make ${SHADOWOPT} ${TEST}
+
+      - name: Tmate
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+        # if: ${{ failure() && github.event_name == 'workflow_dispatch' && inputs.debug_enabled && contains(matrix.extra, 'asan')}}
+        timeout-minutes: 15
+        with:
+          limit-access-to-actor: true
 
 
       # `sg audio` does not work on arm64 runner due to permission ('Incorrect password' error).
