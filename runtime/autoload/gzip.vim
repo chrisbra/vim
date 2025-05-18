@@ -1,6 +1,6 @@
 " Vim autoload file for editing compressed files.
 " Maintainer:	The Vim Project <https://github.com/vim/vim>
-" Last Change:	2024 Nov 25
+" Last Change:	2025 May 18
 " Former Maintainer: Bram Moolenaar <Bram@vim.org>
 
 " These functions are used by the gzip plugin.
@@ -82,17 +82,12 @@ fun gzip#read(cmd)
   let empty = line("'[") == 1 && line("']") == line("$")
   let tmp = tempname()
   let tmpe = tmp . "." . expand("<afile>:e")
-  if exists('*fnameescape')
-    let tmp_esc = fnameescape(tmp)
-    let tmpe_esc = fnameescape(tmpe)
-  else
-    let tmp_esc = escape(tmp, ' ')
-    let tmpe_esc = escape(tmpe, ' ')
-  endif
+  let tmp_esc = fnameescape(tmp)
+  let tmpe_esc = fnameescape(tmpe)
   " write the just read lines to a temp file "'[,']w tmp.gz"
   execute "silent '[,']w " . tmpe_esc
   " uncompress the temp file: call system("gzip -dn tmp.gz")
-  call system(a:cmd . " " . s:escape(tmpe))
+  call system(a:cmd . " " . shellescape(tmpe))
   if !filereadable(tmp)
     " uncompress didn't work!  Keep the compressed file then.
     echoerr "Error: Could not read uncompressed file"
@@ -101,22 +96,14 @@ fun gzip#read(cmd)
     let ok = 1
     " delete the compressed lines; remember the line number
     let l = line("'[") - 1
-    if exists(":lockmarks")
-      lockmarks '[,']d _
-    else
-      '[,']d _
-    endif
+    lockmarks '[,']d _
     " read in the uncompressed lines "'[-1r tmp"
     " Use ++edit if the buffer was empty, keep the 'ff' and 'fenc' options.
     setlocal nobin
-    if exists(":lockmarks")
-      if empty
-	execute "silent lockmarks " . l . "r ++edit " . tmp_esc
-      else
-	execute "silent lockmarks " . l . "r " . tmp_esc
-      endif
+    if empty
+      execute "undojoin | silent lockmarks " . l . "r ++edit " . tmp_esc
     else
-      execute "silent " . l . "r " . tmp_esc
+      execute "undojoin | silent lockmarks " . l . "r " . tmp_esc
     endif
 
     " if buffer became empty, delete trailing blank line
@@ -126,8 +113,7 @@ fun gzip#read(cmd)
     endif
     " delete the temp file and the used buffers
     call delete(tmp)
-    silent! exe "bwipe " . tmp_esc
-    silent! exe "bwipe " . tmpe_esc
+    silent! exe "bwipe " . tmp_esc . " " . tempe_esc
   endif
   " Store the OK flag, so that we can use it when writing.
   let b:uncompressOk = ok
@@ -143,11 +129,7 @@ fun gzip#read(cmd)
 
   " When uncompressed the whole buffer, do autocommands
   if ok && empty
-    if exists('*fnameescape')
-      let fname = fnameescape(expand("%:r"))
-    else
-      let fname = escape(expand("%:r"), " \t\n*?[{`$\\%#'\"|!<")
-    endif
+    let fname = fnameescape(expand("%:r"))
     if filereadable(undofile(expand("%")))
       exe "sil rundo " . fnameescape(undofile(expand("%")))
     endif
@@ -170,9 +152,9 @@ fun gzip#write(cmd)
     let nmt = s:tempname(nm)
     if rename(nm, nmt) == 0
       if exists("b:gzip_comp_arg")
-	call system(a:cmd . " " . b:gzip_comp_arg . " -- " . s:escape(nmt))
+	call system(a:cmd . " " . b:gzip_comp_arg . " -- " . shellescape(nmt))
       else
-	call system(a:cmd . " -- " . s:escape(nmt))
+	call system(a:cmd . " -- " . shellescape(nmt))
       endif
       call rename(nmt . "." . expand("<afile>:e"), nm)
     endif
@@ -197,10 +179,10 @@ fun gzip#appre(cmd)
     if rename(nm, nmte) == 0
       if &patchmode != "" && getfsize(nm . &patchmode) == -1
 	" Create patchmode file by creating the decompressed file new
-	call system(a:cmd . " -c -- " . s:escape(nmte) . " > " . s:escape(nmt))
+	call system(a:cmd . " -c -- " . shellescape(nmte) . " > " . shellescape(nmt))
 	call rename(nmte, nm . &patchmode)
       else
-	call system(a:cmd . " -- " . s:escape(nmte))
+	call system(a:cmd . " -- " . shellescape(nmte))
       endif
       call rename(nmt, nm)
     endif
@@ -216,14 +198,6 @@ fun s:tempname(name)
     return fn
   endif
   return fnamemodify(a:name, ":p:h") . "/X~=@l9q5"
-endfun
-
-fun s:escape(name)
-  " shellescape() was added by patch 7.0.111
-  if exists("*shellescape")
-    return shellescape(a:name)
-  endif
-  return "'" . a:name . "'"
 endfun
 
 " vim: set sw=2 :
