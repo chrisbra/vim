@@ -1,15 +1,16 @@
 #!/bin/sh
 
-wayland-scanner client-header protocols/ext-data-control-v1.xml auto/wayland/ext-data-control-v1.h
-wayland-scanner private-code protocols/ext-data-control-v1.xml auto/wayland/ext-data-control-v1.c
+dirname=$(dirname $(realpath $0))
 
-wayland-scanner client-header protocols/wlr-data-control-unstable-v1.xml auto/wayland/wlr-data-control-unstable-v1.h
-wayland-scanner private-code protocols/wlr-data-control-unstable-v1.xml auto/wayland/wlr-data-control-unstable-v1.c
+if ! command -v wayland-scanner >/dev/null 2>&1; then
+  echo "wayland-scanner not available, exiting..."
+  exit 1
+fi
 
-wayland-scanner client-header protocols/xdg-shell.xml auto/wayland/xdg-shell.h
-wayland-scanner private-code protocols/xdg-shell.xml auto/wayland/xdg-shell.c
-
-wayland-scanner client-header protocols/primary-selection-unstable-v1.xml auto/wayland/primary-selection-unstable-v1.h
-wayland-scanner private-code protocols/primary-selection-unstable-v1.xml auto/wayland/primary-selection-unstable-v1.c
+for proto in ext-data-control-v1 wlr-data-control-unstable-v1 xdg-shell primary-selection-unstable-v1; do
+  echo "generating $proto"
+  wayland-scanner client-header "$dirname"/protocols/"$proto".xml "$dirname"/auto/wayland/"$proto".h
+  wayland-scanner private-code  "$dirname"/protocols/"$proto".xml "$dirname"/auto/wayland/"$proto".c
+done
 
 # vim: set sw=2 sts=2 et:
