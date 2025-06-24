@@ -63,6 +63,8 @@ if has('gui_running')
 
   func s:SetDefaultOptionsForGUIBuilds()
     set columns=80 lines=25
+    call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
+    call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
   endfunc
 else
   func s:SetDefaultOptionsForGUIBuilds()
