@@ -326,7 +326,7 @@ jobs:
       #   with:
       #     limit-access-to-actor: true
 
-      - if: ${{ !cancelled() }}
+      - if: ${{ failure() }}
         uses: ./.github/actions/test_artifacts
 
       - name: Vim tags
