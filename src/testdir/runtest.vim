@@ -56,9 +56,10 @@ let $TEST_NO_RETRY="yes"
 
 func GUIEnterAutocmd()
   let fname='gui_debug_sizes.failed'
-  let log = []
-  call add(log, $"GUI size: {&columns} columns X {&lines} lines")
-  call add(log, $"Window Size: {winwidth(0)}")
+  let g:log = []
+  call add(g:log, $"GUI size: {&columns} columns X {&lines} lines")
+  call add(g:log, $"Window Size: {winwidth(0)}")
+  call timer_start(500, { -> writefile(g:log, 'test_guilog.txt', 'a')})
   au GUIEnter * call writefile(log, "test.log", 'a')
   au GUIEnter * call writefile(log, "/tmp/test.log", 'a')
 endfunc
@@ -76,11 +77,11 @@ if has('gui_running')
     call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
     call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
   endfunc
-  call GUIEnterAutocmd()
 else
   func s:SetDefaultOptionsForGUIBuilds()
   endfunc
 endif
+call GUIEnterAutocmd()
 
 " Check that the screen size is at least 24 x 80 characters.
 if &lines < 24 || &columns < 80
