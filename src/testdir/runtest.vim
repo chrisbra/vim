@@ -52,6 +52,16 @@
 silent! while 0
   qa!
 silent! endwhile
+let $TEST_NO_RETRY="yes"
+
+func GUIEnterAutocmd()
+  let fname='gui_debug_sizes.failed'
+  let log = []
+  call add(log, $"GUI size: {&columns} columns X {&lines} lines")
+  call add(log, $"Window Size: {winwidth(0)}")
+  au GUIEnter * call writefile(log, "test.log", 'a')
+  au GUIEnter * call writefile(log, "/tmp/test.log", 'a')
+endfunc
 
 " In the GUI we can always change the screen size.
 if has('gui_running')
@@ -66,6 +76,7 @@ if has('gui_running')
     call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
     call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
   endfunc
+  call GUIEnterAutocmd()
 else
   func s:SetDefaultOptionsForGUIBuilds()
   endfunc
