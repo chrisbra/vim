@@ -115,7 +115,7 @@ jobs:
           # Some of the ASAN suppressions are in libraries linked with dlopen
           # and symbolization of them requires these debug packages.
           sudo apt install ubuntu-dbgsym-keyring
-          sudo cp ci/ddebs.list /etc/apt/sources.list.d/ddebs.list
+          #sudo cp ci/ddebs.list /etc/apt/sources.list.d/ddebs.list
           sudo cp ci/pinned-pkgs /etc/apt/preferences.d/pinned-pkgs
 
       - name: Install packages
