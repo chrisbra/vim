@@ -129,6 +129,8 @@ func RunVimInTerminal(arguments, options)
   endif
 
   call TermWait(buf)
+  " verify size
+  call assert_equal([rows, cols], term_getsize(buf))
 
   if get(a:options, 'wait_for_ruler', 1) && empty(get(a:options, 'cmd', ''))
     " Wait for "All" or "Top" of the ruler to be shown in the last line or in
