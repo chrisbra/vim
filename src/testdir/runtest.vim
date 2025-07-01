@@ -60,8 +60,6 @@ func GUIEnterAutocmd()
   call add(g:log, $"GUI size: {&columns} columns X {&lines} lines")
   call add(g:log, $"Window Size: {winwidth(0)}")
   call timer_start(500, { -> writefile(g:log, 'test_guilog.txt', 'a')})
-  au GUIEnter * call writefile(log, "test.log", 'a')
-  au GUIEnter * call writefile(log, "/tmp/test.log", 'a')
 endfunc
 
 " In the GUI we can always change the screen size.
@@ -74,8 +72,6 @@ if has('gui_running')
 
   func s:SetDefaultOptionsForGUIBuilds()
     set columns=80 lines=25
-    call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
-    call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
   endfunc
 else
   func s:SetDefaultOptionsForGUIBuilds()

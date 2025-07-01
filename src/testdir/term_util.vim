@@ -19,6 +19,15 @@ if !has('terminal')
   finish
 endif
 
+func SetDefaultOptionsForGUIBuilds()
+  if has('gui_gtk')
+    set columns=80 lines=25 guioptions=M
+    call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
+    call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
+    call assert_equal('M', &guioptions, 'Guioptions')
+  endif
+endfunc
+
 " Stops the shell running in terminal "buf".
 func StopShellInTerminal(buf)
   call term_sendkeys(a:buf, "exit\r")
@@ -147,6 +156,7 @@ func RunVimInTerminal(arguments, options)
 
   " Starting a terminal to run Vim is always considered flaky.
   let g:test_is_flaky = 1
+  call SetDefaultOptionsForGUIBuilds()
 
   return buf
 endfunc
