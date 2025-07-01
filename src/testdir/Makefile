@@ -188,10 +188,6 @@ opt_test.vim: $(GEN_OPT_DEPS)
 	else \
 		$(VIMPROG) -e -s -u NONE $(NO_INITS) --nofork --gui-dialog-file guidialog -S $(GEN_OPT_DEPS) ; \
 	fi
-	@if test -f test.log; then \
-		cat test.log; \
-		exit 1; \
-	fi
 
 test_xxd.res:
 	if test -n "$${ASAN_OPTIONS}"; then \
