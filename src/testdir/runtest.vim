@@ -162,11 +162,11 @@ set nomore
 lang mess C
 
 " suppress menu translation
-if has('gui_running') && exists('did_install_default_menus')
-  source $VIMRUNTIME/delmenu.vim
-  set langmenu=none
-  source $VIMRUNTIME/menu.vim
-endif
+" if has('gui_running') && exists('did_install_default_menus')
+"   source $VIMRUNTIME/delmenu.vim
+"   set langmenu=none
+"   source $VIMRUNTIME/menu.vim
+" endif
 
 let s:srcdir = expand('%:p:h:h')
 

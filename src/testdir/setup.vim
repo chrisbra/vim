@@ -44,4 +44,7 @@ if 1
   if !isdirectory($HOME)
     call mkdir($HOME)
   endif
+  if has("gui_gtk")
+    set guioptions=M
+  endif
 endif
