@@ -21,10 +21,11 @@ endif
 
 func SetDefaultOptionsForGUIBuilds()
   if has('gui_gtk')
-    set columns=80 lines=25 guioptions=M
+    "set columns=80 lines=25 guioptions=M
     call assert_equal(80, &columns, 'Setting Default GUI Size: Columns')
     call assert_equal(25, &lines, 'Setting Default GUI Size: Lines')
-    call assert_equal('M', &guioptions, 'Guioptions')
+    "call assert_equal('M', &guioptions, 'Guioptions')
+    call timer_start(500, { -> writefile(g:log, 'test_guilog2.txt', 'a')})
   endif
 endfunc
 

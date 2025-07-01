@@ -2223,7 +2223,7 @@ scripttests:
 
 # Run the tests with the GUI.  Assumes vim/gvim was already built
 testgui:
-	cd testdir; $(MAKE) -f Makefile $(GUI_TESTTARGET) VIMPROG=../$(VIMTARGET) GUI_FLAG=-g $(GUI_TESTARG) SCRIPTSOURCE=../$(SCRIPTSOURCE)
+	cd testdir; $(MAKE) -f Makefile $(GUI_TESTTARGET) VIMPROG=../$(VIMTARGET) GUI_FLAG="-g -geometry 80x25+0+0" $(GUI_TESTARG) SCRIPTSOURCE=../$(SCRIPTSOURCE)
 
 testtiny:
 	cd testdir; $(MAKE) -f Makefile tiny VIMPROG=../$(VIMTARGET) SCRIPTSOURCE=../$(SCRIPTSOURCE)
