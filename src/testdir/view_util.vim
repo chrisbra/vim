@@ -57,6 +57,10 @@ func NewWindow(height, width) abort
   exe a:width . 'vsp'
   set winfixwidth winfixheight
   redraw!
+  let width=matchstr(a:width, '\d\+')+0
+  let height=matchstr(a:height, '\d\+')+0
+  call assert_equal(winwidth(0), width)
+  call assert_equal(winheight(0), height)
 endfunc
 
 func CloseWindow() abort

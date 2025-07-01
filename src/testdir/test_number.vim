@@ -15,6 +15,8 @@ endfunc
 
 func s:test_windows(h, w) abort
   call NewWindow(a:h, a:w)
+  call assert_equal(winheight(0), a:h)
+  call assert_equal(winwidth(0), a:w)
 endfunc
 
 func s:close_windows() abort
