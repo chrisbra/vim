@@ -1,6 +1,5 @@
 " Tests for the writefile() function and some :write commands.
 
-source check.vim
 source term_util.vim
 
 func Test_writefile()

@@ -1,10 +1,8 @@
 " Test for timers
 
-source check.vim
 CheckFeature timers
 
 source screendump.vim
-source shared.vim
 source term_util.vim
 
 func SetUp()

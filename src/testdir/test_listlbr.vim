@@ -3,7 +3,6 @@
 set encoding=latin1
 scriptencoding latin1
 
-source check.vim
 CheckOption linebreak
 CheckFeature conceal
 

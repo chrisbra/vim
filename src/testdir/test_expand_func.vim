@@ -1,7 +1,5 @@
 " Tests for expand()
 
-source shared.vim
-
 let s:sfile = expand('<sfile>')
 let s:slnum = str2nr(expand('<slnum>'))
 let s:sflnum = str2nr(expand('<sflnum>'))

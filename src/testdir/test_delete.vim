@@ -1,6 +1,5 @@
 " Test for delete().
 
-source check.vim
 source term_util.vim
 source screendump.vim
 

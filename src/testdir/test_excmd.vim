@@ -1,7 +1,5 @@
 " Tests for various Ex commands.
 
-source check.vim
-source shared.vim
 source term_util.vim
 source screendump.vim
 

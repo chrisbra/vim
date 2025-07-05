@@ -1,10 +1,8 @@
 " Test for the --remote functionality
 
-source check.vim
 CheckFeature clientserver
 CheckFeature terminal
 
-source shared.vim
 source screendump.vim
 source mouse.vim
 source term_util.vim

@@ -1,6 +1,5 @@
 " Test for matchadd() and conceal feature
 
-source check.vim
 CheckFeature conceal
 
 if !has('gui_running') && has('unix')

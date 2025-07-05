@@ -1,9 +1,7 @@
 " Tests for startup.
 
-source shared.vim
 source screendump.vim
 source term_util.vim
-source check.vim
 
 " Check that loading startup.vim works.
 func Test_startup_script()

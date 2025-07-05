@@ -1,7 +1,5 @@
 " Test argument list commands
 
-source check.vim
-source shared.vim
 source term_util.vim
 
 func Reset_arglist()

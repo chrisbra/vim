@@ -1,6 +1,5 @@
 " Tests for not changing curswant
 
-source check.vim
 source term_util.vim
 
 func Test_curswant()

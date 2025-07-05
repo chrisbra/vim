@@ -1,6 +1,5 @@
 " Tests for digraphs
 
-source check.vim
 CheckFeature digraphs
 source term_util.vim
 

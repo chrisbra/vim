@@ -1,8 +1,6 @@
 " Test for reading and writing .viminfo
 
-source check.vim
 source term_util.vim
-source shared.vim
 
 func Test_viminfo_read_and_write()
   " First clear 'history', so that "hislen" is zero.  Then set it again,

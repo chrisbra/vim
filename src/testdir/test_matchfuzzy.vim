@@ -1,7 +1,5 @@
 " Tests for fuzzy matching
 
-source shared.vim
-source check.vim
 source term_util.vim
 
 " Test for matchfuzzy()

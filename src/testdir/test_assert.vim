@@ -1,6 +1,5 @@
 " Test that the methods used for testing work.
 
-source check.vim
 source term_util.vim
 
 func Test_assert_false()
