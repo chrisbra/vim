@@ -16,6 +16,7 @@
 "                               instead of shelling out to file(1)
 "   2025 Apr 16 by Vim Project: decouple from netrw by adding s:WinPath()
 "   2025 May 19 by Vim Project: restore working directory after read/write
+"   2025 Jul 13 by Vim Project: drop leading /
 "
 "	Contains many ideas from Michael Toren's <tar.vim>
 "
@@ -34,9 +35,9 @@ if &cp || exists("g:loaded_tar")
  finish
 endif
 let g:loaded_tar= "v32b"
-if v:version < 702
+if v:version < 900
  echohl WarningMsg
- echo "***warning*** this version of tar needs vim 7.2"
+ echo "***warning*** this version of tar needs vim 9.0"
  echohl Normal
  finish
 endif
@@ -46,10 +47,10 @@ set cpo&vim
 " ---------------------------------------------------------------------
 "  Default Settings: {{{1
 if !exists("g:tar_browseoptions")
- let g:tar_browseoptions= "Ptf"
+ let g:tar_browseoptions= "tf"
 endif
 if !exists("g:tar_readoptions")
- let g:tar_readoptions= "pPxf"
+ let g:tar_readoptions= "pxf"
 endif
 if !exists("g:tar_cmd")
  let g:tar_cmd= "tar"
@@ -58,6 +59,7 @@ if !exists("g:tar_writeoptions")
  let g:tar_writeoptions= "uf"
 endif
 if !exists("g:tar_delfile")
+ " Note: not supported on BSD
  let g:tar_delfile="--delete -f"
 endif
 if !exists("g:netrw_cygwin")
@@ -106,9 +108,24 @@ if !exists("g:tar_shq")
  endif
 endif
 
+let g:tar_secure=' -- '
+
 " ----------------
 "  Functions: {{{1
 " ----------------
+
+" ---------------------------------------------------------------------
+" s:Msg: {{{2
+fun! s:Msg(func, severity, msg)
+  redraw!
+  if a:severity =~? 'error'
+    echohl Error 
+  else
+    echohl WarningMsg
+  endif
+  echo $"***{a:severity}*** ({a:func}) {a:msg}"
+  echohl None
+endfunc
 
 " ---------------------------------------------------------------------
 " tar#Browse: {{{2
@@ -118,16 +135,14 @@ fun! tar#Browse(tarfile)
 
   " sanity checks
   if !executable(g:tar_cmd)
-   redraw!
-   echohl Error | echo '***error*** (tar#Browse) "'.g:tar_cmd.'" not available on your system'
+   call s:Msg('tar#Browse', 'error', $"{g:tar_cmd} not available on your system")
    let &report= repkeep
    return
   endif
   if !filereadable(a:tarfile)
    if a:tarfile !~# '^\a\+://'
     " if it's an url, don't complain, let url-handlers such as vim do its thing
-    redraw!
-    echohl Error | echo "***error*** (tar#Browse) File not readable<".a:tarfile.">" | echohl None
+    call s:Msg('tar#Browse', 'error', $"File not readable<{a:tarfile}>")
    endif
    let &report= repkeep
    return
@@ -203,28 +218,19 @@ fun! tar#Browse(tarfile)
    exe "sil! r! ".g:tar_cmd." -".g:tar_browseoptions." ".shellescape(tarfile,1)
   endif
   if v:shell_error != 0
-   redraw!
-   echohl WarningMsg | echo "***warning*** (tar#Browse) please check your g:tar_browseoptions<".g:tar_browseoptions.">"
+   call s:Msg('tar#Browse', 'warning', $"please check your g:tar_browseoptions '<{g:tar_browseoptions}>'")
    return
   endif
-  "
-  " The following should not be neccessary, since in case of errors the
-  " previous if statement should have caught the problem (because tar exited
-  " with a non-zero exit code).
-  " if line("$") == curlast || ( line("$") == (curlast + 1) &&
-  "       \ getline("$") =~# '\c\<\%(warning\|error\|inappropriate\|unrecognized\)\>' &&
-  "       \ getline("$") =~  '\s' )
-  "  redraw!
-  "  echohl WarningMsg | echo "***warning*** (tar#Browse) ".a:tarfile." doesn't appear to be a tar file" | echohl None
-  "  keepj sil! %d
-  "  let eikeep= &ei
-  "  set ei=BufReadCmd,FileReadCmd
-  "  exe "r ".fnameescape(a:tarfile)
-  "  let &ei= eikeep
-  "  keepj sil! 1d
-  "   call Dret("tar#Browse : a:tarfile<".a:tarfile.">")
-  "  return
-  " endif
+
+  " remove tar: Removing leading '/' from member names
+  " Note: the message could be localized
+  if search('^tar: ') > 0 || search('^/') > 0
+    call append(3,'" Note: dropped leading /')
+    let b:leading_slash = 1
+    " remove the message output
+    sil g/^tar: /d
+    %s#^/#./#
+  endif
 
   " set up maps supported for tar
   setlocal noma nomod ro
@@ -243,10 +249,14 @@ fun! s:TarBrowseSelect()
   let repkeep= &report
   set report=10
   let fname= getline(".")
+  let tfname = fname
+  let ls= get(b:, 'leading_slash', 0)
+  if ls
+    let tfname = fname[1:]
+  endif
 
-  if !exists("g:tar_secure") && fname =~ '^\s*-\|\s\+-'
-   redraw!
-   echohl WarningMsg | echo '***warning*** (tar#BrowseSelect) rejecting tarfile member<'.fname.'> because of embedded "-"'
+  if fname =~ '^\s*-\|\s\+-'
+   call s:Msg('tar#BrowseSelect', 'warning', $"rejecting tarfile member<'{fname}'> because of embedded '-'")
    return
   endif
 
@@ -270,36 +280,29 @@ fun! s:TarBrowseSelect()
    wincmd _
   endif
   let s:tblfile_{winnr()}= curfile
-  call tar#Read("tarfile:".tarfile.'::'.fname,1)
+  let b:leading_slash= ls
+  call tar#Read("tarfile:".tarfile.'::'.tfname)
   filetype detect
   set nomod
-  exe 'com! -buffer -nargs=? -complete=file TarDiff	:call tar#Diff(<q-args>,"'.fnameescape(fname).'")'
+  exe 'com! -buffer -nargs=? -complete=file TarDiff	:call tar#Diff(<q-args>,"'.fnameescape(tfname).'")'
 
   let &report= repkeep
 endfun
 
 " ---------------------------------------------------------------------
 " tar#Read: {{{2
-fun! tar#Read(fname,mode)
+fun! tar#Read(fname)
   let repkeep= &report
   set report=10
   let tarfile = substitute(a:fname,'tarfile:\(.\{-}\)::.*$','\1','')
   let fname   = substitute(a:fname,'tarfile:.\{-}::\(.*\)$','\1','')
   " be careful not to execute special crafted files
-  let escape_file = fname->fnameescape()
-
-  " changing the directory to the temporary earlier to allow tar to extract the file with permissions intact
-  if !exists("*mkdir")
-   redraw!
-   echohl Error | echo "***error*** (tar#Write) sorry, mkdir() doesn't work on your system" | echohl None
-   let &report= repkeep
-   return
-  endif
+  let escape_file = (get(b:, 'leading_slash', 0) ? '.' : ''). fname->fnameescape()
 
   let curdir= getcwd()
+  let b:curdir= curdir
   let tmpdir= tempname()
-  let b:curdir= tmpdir
-  let b:tmpdir= curdir
+  let b:tmpdir= tmpdir
   if tmpdir =~ '\.'
    let tmpdir= substitute(tmpdir,'\.[^.]*$','','e')
   endif
@@ -309,8 +312,7 @@ fun! tar#Read(fname,mode)
   try
    exe "lcd ".fnameescape(tmpdir)
   catch /^Vim\%((\a\+)\)\=:E344/
-   redraw!
-   echohl Error | echo "***error*** (tar#Write) cannot lcd to temporary directory" | Echohl None
+   call s:Msg('tar#Read', 'error', "cannot lcd to temporary directory")
    let &report= repkeep
    return
   endtry
@@ -333,7 +335,7 @@ fun! tar#Read(fname,mode)
   elseif  fname =~ '\.bz3$' && executable("bz3cat")
    let decmp= "|bz3cat"
    let doro = 1
-  elseif      fname =~ '\.t\=gz$'  && executable("zcat")
+  elseif  fname =~ '\.t\=gz$'  && executable("zcat")
    let decmp= "|zcat"
    let doro = 1
   elseif  fname =~ '\.lzma$' && executable("lzcat")
@@ -356,68 +358,66 @@ fun! tar#Read(fname,mode)
    endif
   endif
 
-  if exists("g:tar_secure")
-   let tar_secure= " -- "
-  else
-   let tar_secure= " "
-  endif
 
   if tarfile =~# '\.bz2$'
-   exe "sil! r! bzip2 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! bzip2 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\.bz3$'
-   exe "sil! r! bzip3 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! bzip3 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\.\(gz\)$'
-   exe "sil! r! gzip -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! gzip -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\(\.tgz\|\.tbz\|\.txz\)'
    let filekind= s:Header(tarfile)
    if filekind =~? "bzip2"
-    exe "sil! r! bzip2 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+    exe "sil! r! bzip2 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
     exe "read ".escape_file
    elseif filekind =~ "bzip3"
-    exe "sil! r! bzip3 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+    exe "sil! r! bzip3 -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
     exe "read ".escape_file
    elseif filekind =~? "xz"
-    exe "sil! r! xz -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+    exe "sil! r! xz -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
     exe "read ".escape_file
    elseif filekind =~? "zstd"
-    exe "sil! r! zstd --decompress --stdout -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+    exe "sil! r! zstd --decompress --stdout -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
     exe "read ".escape_file
    elseif filekind =~? "gzip"
-    exe "sil! r! gzip -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+    exe "sil! r! gzip -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
     exe "read ".escape_file
    endif
 
   elseif tarfile =~# '\.lrp$'
-   exe "sil! r! cat -- ".shellescape(tarfile,1)." | gzip -d -c - | ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! cat -- ".shellescape(tarfile,1)." | gzip -d -c - | ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\.lzma$'
-   exe "sil! r! lzma -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! lzma -d -c -- ".shellescape(tarfile,1)."| ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\.\(xz\|txz\)$'
-   exe "sil! r! xz --decompress --stdout -- ".shellescape(tarfile,1)." | ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! xz --decompress --stdout -- ".shellescape(tarfile,1)." | ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   elseif tarfile =~# '\.\(lz4\|tlz4\)$'
-   exe "sil! r! lz4 --decompress --stdout -- ".shellescape(tarfile,1)." | ".g:tar_cmd." -".g:tar_readoptions." - ".tar_secure.shellescape(fname,1).decmp
+   exe "sil! r! lz4 --decompress --stdout -- ".shellescape(tarfile,1)." | ".g:tar_cmd." -".g:tar_readoptions." - ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
   else
    if tarfile =~ '^\s*-'
     " A file name starting with a dash is taken as an option.  Prepend ./ to avoid that.
     let tarfile = substitute(tarfile, '-', './-', '')
    endif
-   exe "silent r! ".g:tar_cmd." -".g:tar_readoptions.shellescape(tarfile,1)." ".tar_secure.shellescape(fname,1).decmp
+   exe "silent r! ".g:tar_cmd." -".g:tar_readoptions.shellescape(tarfile,1)." ".g:tar_secure.shellescape(fname,1).decmp
    exe "read ".escape_file
+  endif
+  if get(b:, 'leading_slash', 0)
+    sil g/^tar: /d
   endif
 
    redraw!
 
-if v:shell_error != 0
+  if v:shell_error != 0
    lcd ..
    call s:Rmdir("_ZIPVIM_")
    exe "lcd ".fnameescape(curdir)
-   echohl Error | echo "***error*** (tar#Read) sorry, unable to open or extract ".tarfile." with ".fname | echohl None
+   call s:Msg('tar#Read', 'error', $"sorry, unable to open or extract {tarfile} with {fname}")
   endif
 
   if doro
@@ -426,7 +426,6 @@ if v:shell_error != 0
   endif
 
   let b:tarfile= a:fname
-  exe "file tarfile::".fnameescape(fname)
 
   " cleanup
   keepj sil! 0d
@@ -434,7 +433,7 @@ if v:shell_error != 0
 
   let &report= repkeep
   exe "lcd ".fnameescape(curdir)
-  silent exe "file tarfile::".escape_file
+  silent exe "file tarfile::". fname->fnameescape()
 endfun
 
 " ---------------------------------------------------------------------
@@ -446,9 +445,9 @@ fun! tar#Write(fname)
   let curdir= b:curdir
   let tmpdir= b:tmpdir
 
-  if !exists("g:tar_secure") && a:fname =~ '^\s*-\|\s\+-'
-   redraw!
-   echohl WarningMsg | echo '***warning*** (tar#Write) rejecting tarfile member<'.a:fname.'> because of embedded "-"'
+
+  if a:fname =~ '^\s*-\|\s\+-'
+   call s:Msg('tar#Write', 'warning', $"rejecting tarfile member<{a:fname}> because of embedded '-'")
    return
   endif
 
@@ -461,6 +460,23 @@ fun! tar#Write(fname)
 
   let tarfile = substitute(b:tarfile,'tarfile:\(.\{-}\)::.*$','\1','')
   let fname   = substitute(b:tarfile,'tarfile:.\{-}::\(.*\)$','\1','')
+  let tfname  = fname
+  if get(b:, 'leading_slash', 0)
+    let tfname = '.' . tfname
+  endif
+
+  if !isdirectory(fnameescape(tmpdir))
+    call mkdir(fnameescape(tmpdir), 'p')
+  endif
+  exe $"lcd {fnameescape(tmpdir)}"
+  if !isdirectory("_ZIPVIM_")
+    call mkdir("_ZIPVIM_")
+  endif
+  lcd _ZIPVIM_
+
+  if !isdirectory(fnamemodify(tfname, ':p:h'))
+    call mkdir(fnamemodify(tfname, ':p:h'))
+  endif
 
   " handle compressed archives
   if tarfile =~# '\.bz2'
@@ -500,8 +516,7 @@ fun! tar#Write(fname)
   " Note: no support for name.tar.tbz/.txz/.tgz/.tlz4/.tzst
 
   if v:shell_error != 0
-   redraw!
-   echohl Error | echo "***error*** (tar#Write) sorry, unable to update ".tarfile." with ".fname | echohl None
+   call s:Msg('tar#Write', 'error', $"sorry, unable to update {tarfile} with {fname}")
   else
 
    if fname =~ '/'
@@ -519,28 +534,21 @@ fun! tar#Write(fname)
     let tarfile = substitute(tarfile, '-', './-', '')
    endif
 
-   if exists("g:tar_secure")
-    let tar_secure= " -- "
-   else
-    let tar_secure= " "
-   endif
-   exe "w! ".fnameescape(fname)
+   exe "w! ".fnameescape(tfname)
    if has("win32unix") && executable("cygpath")
     let tarfile = substitute(system("cygpath ".shellescape(tarfile,0)),'\n','','e')
    endif
 
    " delete old file from tarfile
-   call system(g:tar_cmd." ".g:tar_delfile." ".shellescape(tarfile,0).tar_secure.shellescape(fname,0))
+   " Note: BSD tar does not support --delete flag
+   call system(g:tar_cmd." ".g:tar_delfile." ".shellescape(tarfile,0).g:tar_secure.shellescape(fname,0))
    if v:shell_error != 0
-    redraw!
-    echohl Error | echo "***error*** (tar#Write) sorry, unable to update ".fnameescape(tarfile)." with ".fnameescape(fname) | echohl None
+    call s:Msg('tar#Write', 'error', $"sorry, unable to update {fnameescape(tarfile)} with {fnameescape(fname)} --delete not supported?")
    else
-
     " update tarfile with new file
-    call system(g:tar_cmd." -".g:tar_writeoptions." ".shellescape(tarfile,0).tar_secure.shellescape(fname,0))
+    call system(g:tar_cmd." -".g:tar_writeoptions." ".shellescape(tarfile,0).g:tar_secure.shellescape(tfname,0))
     if v:shell_error != 0
-     redraw!
-     echohl Error | echo "***error*** (tar#Write) sorry, unable to update ".fnameescape(tarfile)." with ".fnameescape(fname) | echohl None
+     call s:Msg('tar#Write', 'error', $"sorry, unable to update {fnameescape(tarfile)} with {fnameescape(fname)}")
     elseif exists("compress")
      call system(compress)
      if exists("tgz")
@@ -581,6 +589,7 @@ fun! tar#Diff(userfname,fname)
   if a:userfname != ""
    let fname= a:userfname
   endif
+  exe "lcd ".fnameescape(b:tmpdir). '/_ZIPVIM_'
   if filereadable(fname)
    " sets current file (from tarball) for diff'ing
    " splits window vertically
@@ -604,9 +613,8 @@ fun! tar#Extract()
   set report=10
   let fname= getline(".")
 
-  if !exists("g:tar_secure") && fname =~ '^\s*-\|\s\+-'
-   redraw!
-   echohl WarningMsg | echo '***warning*** (tar#BrowseSelect) rejecting tarfile member<'.fname.'> because of embedded "-"'
+  if fname =~ '^\s*-\|\s\+-'
+   call s:Msg('tar#Extract', 'error', $"rejecting tarfile member<{fname}> because of embedded '-'")
    return
   endif
 
@@ -616,113 +624,118 @@ fun! tar#Extract()
    return
   endif
 
+  let tfname= fname
+  if get(b:, 'leading_slash', 0)
+    let tfname= fname[1:]
+  endif
+
   let tarball = expand("%")
   let tarbase = substitute(tarball,'\..*$','','')
 
   let extractcmd= s:WinPath(g:tar_extractcmd)
   if filereadable(tarbase.".tar")
-   call system(extractcmd." ".shellescape(tarbase).".tar ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tar ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar {fname}: failed!")
    else
-    echo "***note*** successfully extracted ".fname
+    echo "***note*** successfully extracted ". fname
    endif
 
   elseif filereadable(tarbase.".tgz")
    let extractcmd= substitute(extractcmd,"-","-z","")
-   call system(extractcmd." ".shellescape(tarbase).".tgz ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tgz ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tgz ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tgz {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.gz")
    let extractcmd= substitute(extractcmd,"-","-z","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.gz ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.gz ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tar.gz ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.gz {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tbz")
    let extractcmd= substitute(extractcmd,"-","-j","")
-   call system(extractcmd." ".shellescape(tarbase).".tbz ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tbz ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd."j ".tarbase.".tbz ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tbz {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.bz2")
    let extractcmd= substitute(extractcmd,"-","-j","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.bz2 ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.bz2 ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd."j ".tarbase.".tar.bz2 ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.bz2 {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.bz3")
    let extractcmd= substitute(extractcmd,"-","-j","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.bz3 ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.bz3 ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd."j ".tarbase.".tar.bz3 ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.bz3 {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".txz")
    let extractcmd= substitute(extractcmd,"-","-J","")
-   call system(extractcmd." ".shellescape(tarbase).".txz ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".txz ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".txz ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.txz {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.xz")
    let extractcmd= substitute(extractcmd,"-","-J","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.xz ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.xz ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tar.xz ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.xz {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tzst")
    let extractcmd= substitute(extractcmd,"-","--zstd","")
-   call system(extractcmd." ".shellescape(tarbase).".tzst ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tzst ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tzst ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tzst {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.zst")
    let extractcmd= substitute(extractcmd,"-","--zstd","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.zst ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.zst ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tar.zst ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.zst {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tlz4")
    let extractcmd= substitute(extractcmd,"-","-I lz4","")
-   call system(extractcmd." ".shellescape(tarbase).".tlz4 ".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tlz4 ".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tlz4 ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tlz4 {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
 
   elseif filereadable(tarbase.".tar.lz4")
    let extractcmd= substitute(extractcmd,"-","-I lz4","")
-   call system(extractcmd." ".shellescape(tarbase).".tar.lz4".shellescape(fname))
+   call system(extractcmd." ".shellescape(tarbase).".tar.lz4".shellescape(tfname))
    if v:shell_error != 0
-    echohl Error | echo "***error*** ".extractcmd." ".tarbase.".tar.lz4 ".fname.": failed!" | echohl NONE
+    call s:Msg('tar#Extract', 'error', $"{extractcmd} {tarbase}.tar.lz4 {fname}: failed!")
    else
     echo "***note*** successfully extracted ".fname
    endif
@@ -735,15 +748,7 @@ endfun
 " ---------------------------------------------------------------------
 " s:Rmdir: {{{2
 fun! s:Rmdir(fname)
-  if has("unix")
-   call system("/bin/rm -rf -- ".shellescape(a:fname,0))
-  elseif has("win32") || has("win95") || has("win64") || has("win16")
-   if &shell =~? "sh$"
-    call system("/bin/rm -rf -- ".shellescape(a:fname,0))
-   else
-    call system("del /S ".shellescape(a:fname,0))
-   endif
-  endif
+  call delete(a:fname, 'rf')
 endfun
 
 " s:FileHeader: {{{2
