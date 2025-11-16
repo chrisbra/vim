@@ -832,12 +832,11 @@ ins_compl_add_infercase(
     static int
 cfc_has_mode(void)
 {
-    if (ctrl_x_mode_normal() || ctrl_x_mode_dictionary())
-	return (cfc_flags & CFC_KEYWORD) != 0;
-    else if (ctrl_x_mode_files())
-	return (cfc_flags & CFC_FILES) != 0;
-    else if (ctrl_x_mode_whole_line())
-	return (cfc_flags & CFC_WHOLELINE) != 0;
+    if (ctrl_x_mode_normal()
+	    || ctrl_x_mode_dictionary()
+	    || ctrl_x_mode_files()
+	    || ctrl_x_mode_whole_line())
+	    return (get_cot_flags() & COT_FUZZY) != 0;
     else
 	return FALSE;
 }

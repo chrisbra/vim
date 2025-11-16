@@ -31,6 +31,9 @@ function s:parse_vim_option(opt, missing_opt, term_out_code)
 
 		for line in getline(1, line('$'))
 			let list = matchlist(line, '^\s*{\s*"\(\w\+\)"\s*,\s*\%("\(\w\+\)"\|NULL\)\s*,\s*\%([^,]*\(P_BOOL\)[^,]*\|[^,]*\)\s*,\s*\([^,]*NULL\)\?.*')
+      if list[1] == 'completefuzzycollect'
+        continue
+      endif
 			let item.name = list[1]
 			let item.short_name = list[2]
 			let item.is_bool = empty(list[3]) ? 0 : 1

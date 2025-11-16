@@ -381,8 +381,8 @@ func Test_CompleteDone_vevent_keys()
   call assert_equal('foo_test', g:complete_word)
   call assert_equal('files', g:complete_type)
 
-  call writefile(['hello help'], 'test_case.txt', 'D')
-  set dictionary=test_case.txt
+  call writefile(['hello help'], 'Xtest_case.txt', 'D')
+  set dictionary=Xtest_case.txt
   call feedkeys("ggdGSh\<C-X>\<C-K>\<C-Y>\<Esc>", 'tx')
   call assert_equal('hello', g:complete_word)
   call assert_equal('dictionary', g:complete_type)
@@ -3535,11 +3535,15 @@ func Test_complete_opt_fuzzy()
 
   set cot=menu,fuzzy
   call feedkeys("Sblue\<CR>bar\<CR>b\<C-X>\<C-P>\<C-Y>\<ESC>", 'tx')
+  call assert_equal('fooBafor', getline('.'))
+  call feedkeys("Sblue\<CR>bar\<CR>b\<C-X>\<C-P>\<C-P>\<C-Y>\<ESC>", 'tx')
   call assert_equal('blue', getline('.'))
   call feedkeys("Sb\<C-X>\<C-N>\<C-Y>\<ESC>", 'tx')
   call assert_equal('bar', getline('.'))
   call feedkeys("Sb\<C-X>\<C-P>\<C-N>\<C-Y>\<ESC>", 'tx')
   call assert_equal('b', getline('.'))
+  call feedkeys("Sb\<C-X>\<C-P>\<C-P>\<C-N>\<C-Y>\<ESC>", 'tx')
+  call assert_equal('fooBafor', getline('.'))
 
   " chain completion
   call feedkeys("Slore spum\<CR>lor\<C-X>\<C-P>\<C-X>\<C-P>\<ESC>", 'tx')
@@ -3565,7 +3569,8 @@ func Test_complete_opt_fuzzy()
   " Issue 18488: sort after collection when "fuzzy" (unless "nosort")
   %d
   set completeopt&
-  set completeopt+=fuzzy,noselect completefuzzycollect=keyword
+  set completeopt+=fuzzy,noselect
+  " set completefuzzycollect=keyword
   func! PrintMenuWords()
     let info = complete_info(["items"])
     call map(info.items, {_, v -> v.word})
@@ -3592,7 +3597,9 @@ endfunc
 
 func Test_complete_fuzzy_collect()
   new
-  set completefuzzycollect=keyword,files,whole_line
+  set completeopt+=fuzzy
+  " Setting the following option has no effect
+  " set completefuzzycollect=keyword,files,whole_line
   call setline(1, ['hello help hero h'])
   " Use "!" flag of feedkeys() so that ex_normal_busy is not set and
   " ins_compl_check_keys() is not skipped.
@@ -3676,6 +3683,7 @@ func Test_complete_fuzzy_collect()
   call feedkeys("STe\<C-X>\<C-N>x\<CR>\<Esc>0", 'tx!')
   call assert_equal('Tex', getline(line('.') - 1))
 
+  set completeopt=menuone,menu,noselect,fuzzy
   call setline(1, ['fuzzy', 'fuzzycollect', 'completefuzzycollect'])
   call feedkeys("Gofuzzy\<C-X>\<C-N>\<C-N>\<C-N>\<CR>\<Esc>0", 'tx!')
   call assert_equal('fuzzycollect', getline(line('.') - 1))
@@ -3683,8 +3691,9 @@ func Test_complete_fuzzy_collect()
   call assert_equal('completefuzzycollect', getline(line('.') - 1))
 
   " keywords in 'dictonary'
-  call writefile(['hello', 'think'], 'test_dict.txt', 'D')
-  set dict=test_dict.txt
+  set completeopt=menuone,menu,noselect,fuzzy
+  call writefile(['hello', 'think'], 'Xtest_dict.txt', 'D')
+  set dict=Xtest_dict.txt
   call feedkeys("Sh\<C-X>\<C-K>\<C-N>\<CR>\<Esc>0", 'tx!')
   call assert_equal('hello', getline(line('.') - 1))
   call feedkeys("Sh\<C-X>\<C-K>\<C-N>\<C-N>\<CR>\<Esc>0", 'tx!')
@@ -3723,7 +3732,7 @@ endfunc
 
 func Test_cfc_with_longest()
   new
-  set completefuzzycollect=keyword,files,whole_line
+  " set completefuzzycollect=keyword,files,whole_line
   set completeopt=menu,menuone,longest,fuzzy
 
   " keyword
@@ -3807,7 +3816,7 @@ func Test_cfc_with_longest()
 
   bw!
   set completeopt&
-  set completefuzzycollect&
+  " set completefuzzycollect&
 endfunc
 
 func Test_completefuzzycollect_with_completeslash()
@@ -3817,7 +3826,7 @@ func Test_completefuzzycollect_with_completeslash()
   let orig_shellslash = &shellslash
   set cpt&
   new
-  set completefuzzycollect=files
+  "set completefuzzycollect=files
   set noshellslash
 
   " Test with completeslash unset
@@ -3839,7 +3848,7 @@ func Test_completefuzzycollect_with_completeslash()
   " Reset and clean up
   let &shellslash = orig_shellslash
   set completeslash=
-  set completefuzzycollect&
+  " set completefuzzycollect&
   %bw!
 endfunc
 
