@@ -2711,6 +2711,100 @@ theend:
 }
 
 /*
+ * Return the length of the executable part of a command string,
+ * stopping at the first non-quoted whitespace.
+ */
+    static size_t
+executable_len(char_u *cmd)
+{
+    int in_quotes = FALSE;
+    size_t i = 0;
+    for (; cmd[i] != NUL; ++i)
+    {
+	if (cmd[i] == '\\')
+	{
+	    // Skip escaped quote
+	    if (cmd[i + 1] == '"')
+		i++;
+	    continue;
+	}
+	if (cmd[i] == '"')
+	{
+	    in_quotes = !in_quotes;
+	    continue;
+	}
+	if (!in_quotes && VIM_ISWHITE(cmd[i]))
+	    break;
+    }
+    return i;
+}
+
+/*
+ * Resolve the full path of a Windows executable in a command string.
+ * Only relevant for cmd.exe
+ * Returns an allocated string with resolved executable + original arguments,
+ * or NULL if resolution failed.  Caller must free the returned string.
+ */
+    char_u *
+resolve_win_executable(char_u *cmd)
+{
+   if (strstr((char *)gettail(p_sh), "cmd.exe") == NULL)
+	return NULL;
+
+    char_u *cmd_copy = vim_strsave(cmd);
+    char_u *resolved_cmd = NULL;
+
+    if (cmd_copy == NULL)
+	return NULL;
+
+    // Extract the executable
+    size_t len = executable_len(cmd_copy);
+    char_u t = cmd_copy[len];
+    cmd_copy[len] = NUL;
+
+    // resolve command line
+    char_u *resolved = NULL;
+    executable_exists(cmd_copy, len, &resolved, TRUE, TRUE, TRUE);
+    cmd_copy[len] = t;
+
+    if (resolved != NULL)
+    {
+
+	char_u *final_exe = resolved;
+	if (vim_strchr(resolved, ' ') != NULL)
+	{
+	    // Check if already quoted
+	    size_t rlen = STRLEN(resolved);
+	    if (!(rlen >= 2 && resolved[0] == '"' && resolved[rlen - 1] == '"'))
+	    {
+		char_u *quoted = alloc(rlen + 3);
+		if (quoted != NULL)
+		{
+		    quoted[0] = '"';
+		    memcpy(quoted + 1, resolved, rlen);
+		    quoted[rlen + 1] = '"';
+		    quoted[rlen + 2] = NUL;
+		    final_exe = quoted;
+		}
+	    }
+	}
+
+	/* Merge resolved executable with original arguments */
+	size_t newlen = STRLEN(final_exe) + STRLEN(cmd + len) + 2;
+	resolved_cmd = alloc(newlen);
+	if (resolved_cmd != NULL)
+	    vim_snprintf((char *)resolved_cmd, newlen, "%s%s%s",
+			 final_exe,
+			 (*(cmd + len) != NUL ? " " : ""),
+			 cmd + len);
+	if (final_exe != resolved)
+	    vim_free(final_exe);
+    }
+    vim_free(cmd_copy);
+    return resolved_cmd;
+}
+
+/*
  * Return TRUE if "name" is an executable file, FALSE if not or it doesn't exist.
  * When returning TRUE and "path" is not NULL save the path and set "*path" to
  * the allocated memory.
@@ -2748,6 +2842,7 @@ executable_file(char *name, char_u **path)
  * If "use_path" is TRUE: Return TRUE if "name" is in $PATH.
  * If "use_path" is FALSE: Return TRUE if "name" exists.
  * If "use_pathext" is TRUE search "name" with extensions in $PATHEXT.
+ * If "ignore_cwd", is TRUE, current directory is skipped when iterating through $PATH
  * When returning TRUE and "path" is not NULL save the path and set "*path" to
  * the allocated memory.
  */
@@ -2757,7 +2852,8 @@ executable_exists(
     size_t	namelen,
     char_u	**path,
     int		use_path,
-    int		use_pathext)
+    int		use_pathext,
+    int		ignore_cwd)
 {
     // WinNT and later can use _MAX_PATH wide characters for a pathname, which
     // means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
@@ -2867,7 +2963,8 @@ executable_exists(
 		goto theend;
 	    }
 
-	    if (mch_getenv("NoDefaultCurrentDirectoryInExePath") == NULL)
+	    if (mch_getenv("NoDefaultCurrentDirectoryInExePath") == NULL
+		    && !ignore_cwd)
 	    {
 		STRCPY(pathbuf.string, ".;");
 		pathbuf.length = 2;
@@ -3035,7 +3132,7 @@ mch_init_g(void)
 	if (exe_pathlen + 10 >= sizeof(vimrun_location))
 	{
 	    if (executable_exists("vimrun.exe", STRLEN_LITERAL("vimrun.exe"),
-		    NULL, TRUE, FALSE))
+		    NULL, TRUE, FALSE, FALSE))
 		s_dont_use_vimrun = FALSE;
 	}
 	else
@@ -3077,7 +3174,7 @@ mch_init_g(void)
 		}
 	    }
 	    else if (executable_exists("vimrun.exe", STRLEN_LITERAL("vimrun.exe"),
-		    NULL, TRUE, FALSE))
+		    NULL, TRUE, FALSE, FALSE))
 		s_dont_use_vimrun = FALSE;
 	}
 
@@ -3093,7 +3190,7 @@ mch_init_g(void)
      * Otherwise the default "findstr /n" is used.
      */
     if (!executable_exists("findstr.exe", STRLEN_LITERAL("findstr.exe"),
-	    NULL, TRUE, FALSE))
+	    NULL, TRUE, FALSE, FALSE))
 	set_option_value_give_err((char_u *)"grepprg",
 						    0, (char_u *)"grep -n", 0);
 
@@ -4192,7 +4289,7 @@ mch_writable(char_u *name)
     int
 mch_can_exe(char_u *name, char_u **path, int use_path UNUSED)
 {
-    return executable_exists((char *)name, STRLEN(name), path, TRUE, TRUE);
+    return executable_exists((char *)name, STRLEN(name), path, TRUE, TRUE, FALSE);
 }
 
 /*
