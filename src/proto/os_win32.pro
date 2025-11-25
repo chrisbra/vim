@@ -16,6 +16,7 @@ void mch_update_cursor(void);
 int mch_char_avail(void);
 int mch_check_messages(void);
 int mch_inchar(char_u *buf, int maxlen, long time, int tb_change_cnt);
+char_u *resolve_win_executable(char_u *cmd);
 void mch_init(void);
 void mch_exit(int r);
 int mch_check_win(int argc, char **argv);
