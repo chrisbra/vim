@@ -5416,14 +5416,6 @@ make_get_fullcmd(char_u *makecmd, char_u *fname)
     unsigned	len;
     char_u	*mcmd = makecmd;
 
-#ifdef MSWIN
-    {
-	char_u *resolved = resolve_win_executable(makecmd);
-	if (resolved != NULL)
-	    mcmd = resolved;
-    }
-#endif
-
     len = (unsigned)STRLEN(p_shq) * 2 + (unsigned)STRLEN(mcmd) + 1;
     if (*p_sp != NUL)
 	len += (unsigned)STRLEN(p_sp) + (unsigned)STRLEN(fname) + 3;

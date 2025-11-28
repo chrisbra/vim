@@ -1200,18 +1200,6 @@ do_bang(
 	}
     } while (trailarg != NULL);
 
-#ifdef MSWIN
-    if (STRLEN(newcmd) > 0)
-    {
-	char_u *resolved = resolve_win_executable(newcmd);
-	if (resolved != NULL)
-	{
-	    vim_free(newcmd);
-	    newcmd = resolved;
-	}
-    }
-#endif
-
     // Only set "prevcmd" if there is a command to run, otherwise keep te one
     // we have.
     if (STRLEN(newcmd) > 0)
