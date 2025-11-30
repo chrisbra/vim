@@ -2748,7 +2748,6 @@ executable_file(char *name, char_u **path)
  * If "use_path" is TRUE: Return TRUE if "name" is in $PATH.
  * If "use_path" is FALSE: Return TRUE if "name" exists.
  * If "use_pathext" is TRUE search "name" with extensions in $PATHEXT.
- * If "ignore_cwd", is TRUE, current directory is skipped when iterating through $PATH
  * When returning TRUE and "path" is not NULL save the path and set "*path" to
  * the allocated memory.
  */
@@ -2758,8 +2757,7 @@ executable_exists(
     size_t	namelen,
     char_u	**path,
     int		use_path,
-    int		use_pathext,
-    int		ignore_cwd)
+    int		use_pathext)
 {
     // WinNT and later can use _MAX_PATH wide characters for a pathname, which
     // means that the maximum pathname is _MAX_PATH * 3 bytes when 'enc' is
@@ -2869,8 +2867,7 @@ executable_exists(
 		goto theend;
 	    }
 
-	    if (mch_getenv("NoDefaultCurrentDirectoryInExePath") == NULL
-		    && !ignore_cwd)
+	    if (mch_getenv("NoDefaultCurrentDirectoryInExePath") == NULL)
 	    {
 		STRCPY(pathbuf.string, ".;");
 		pathbuf.length = 2;
@@ -3038,7 +3035,7 @@ mch_init_g(void)
 	if (exe_pathlen + 10 >= sizeof(vimrun_location))
 	{
 	    if (executable_exists("vimrun.exe", STRLEN_LITERAL("vimrun.exe"),
-		    NULL, TRUE, FALSE, FALSE))
+		    NULL, TRUE, FALSE))
 		s_dont_use_vimrun = FALSE;
 	}
 	else
@@ -3080,7 +3077,7 @@ mch_init_g(void)
 		}
 	    }
 	    else if (executable_exists("vimrun.exe", STRLEN_LITERAL("vimrun.exe"),
-		    NULL, TRUE, FALSE, FALSE))
+		    NULL, TRUE, FALSE))
 		s_dont_use_vimrun = FALSE;
 	}
 
@@ -3096,7 +3093,7 @@ mch_init_g(void)
      * Otherwise the default "findstr /n" is used.
      */
     if (!executable_exists("findstr.exe", STRLEN_LITERAL("findstr.exe"),
-	    NULL, TRUE, FALSE, FALSE))
+	    NULL, TRUE, FALSE))
 	set_option_value_give_err((char_u *)"grepprg",
 						    0, (char_u *)"grep -n", 0);
 
@@ -4195,7 +4192,7 @@ mch_writable(char_u *name)
     int
 mch_can_exe(char_u *name, char_u **path, int use_path UNUSED)
 {
-    return executable_exists((char *)name, STRLEN(name), path, TRUE, TRUE, FALSE);
+    return executable_exists((char *)name, STRLEN(name), path, TRUE, TRUE);
 }
 
 /*
