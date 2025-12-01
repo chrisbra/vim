@@ -4848,7 +4848,7 @@ func Test_search_wildmenu_iminsert()
   let buf = RunVimInTerminal('-S XTest_search_wildmenu', {'rows': 12})
 
   call term_sendkeys(buf, "/gl\<Tab>")
-  call TermWait(buf, 50)
+  call TermWait(buf, 100)
   call VerifyScreenDump(buf, 'Test_search_wildmenu_iminsert', {})
 
   call term_sendkeys(buf, "\<esc>")
