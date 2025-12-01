@@ -758,7 +758,8 @@ func Test_windows_external_cmd_in_cwd()
   call writefile(file1, 'filename1.txt')
   call writefile(file2, 'filename2.txt')
 
-  grep BBBB filename*.txt
+  " use silent to avoid hit-enter-prompt
+  sil grep BBBB filename*.txt
 
   call assert_equal('filename2.txt', @%)
 
