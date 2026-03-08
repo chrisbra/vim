@@ -2072,7 +2072,6 @@ collection:
 				break;
 			    c = utf_ptr2char(regparse + i);
 			}
-			EMIT(NFA_COMPOSING);
 			EMIT(NFA_CONCAT);
 		    }
 		    MB_PTR_ADV(regparse);
@@ -3187,6 +3186,8 @@ nfa_max_width(nfa_state_T *startstate, int depth)
 		    ++len;
 		if (state->c != NFA_ANY)
 		{
+		    if (state->out1 == NULL || state->out1->out == NULL)
+			return -1;
 		    // skip over the characters
 		    state = state->out1->out;
 		    continue;
@@ -6396,7 +6397,6 @@ nfa_regmatch(
 			if (ccount == MAX_MCO)
 			    break;
 		    }
-
 		    // Check that each composing char in the pattern matches a
 		    // composing char in the text.  We do not check if all
 		    // composing chars are matched.
@@ -6577,8 +6577,64 @@ nfa_regmatch(
 				   || (rex.reg_ic && MB_CASEFOLD(curc)
 						    == MB_CASEFOLD(state->c))))
 		    {
-			result = result_if_matched;
-			break;
+			// If the next state is a combining char, verify it matches
+			// the combining chars in the input.
+			if (enc_utf8 && state->out->c > 0 && utf_iscomposing(state->out->c))
+			{
+			    int	    cchars[MAX_MCO];
+			    int	    ccount = 0;
+			    int	    len = mb_char2len(curc);
+			    int	    j;
+			    nfa_state_T *sta = state->out;
+
+			    // Collect combining chars from input
+			    while (len < clen)
+			    {
+				int mc = mb_ptr2char(rex.input + len);
+				cchars[ccount++] = mc;
+				len += mb_char2len(mc);
+				if (ccount == MAX_MCO)
+				    break;
+			    }
+
+			    // Check each combining char in the pattern matches one in input
+			    result = OK;
+			    while (sta->c > 0 && utf_iscomposing(sta->c)
+					    && sta->c != NFA_END_COLL)
+			    {
+				for (j = 0; j < ccount; ++j)
+				{
+				    if (cchars[j] == sta->c)
+					break;
+				}
+				if (j == ccount)
+				{
+				    result = FAIL;
+				    break;
+				}
+				sta = sta->out;
+			    }
+			    if (result == OK)
+			    {
+				result = result_if_matched;
+				break;
+			    }
+			    // skip over the combining char nodes to continue loop
+			    while (state->out->c > 0 && utf_iscomposing(state->out->c))
+				state = state->out;
+			}
+			else
+			{
+			    // Don't match a combining char node standalone —
+			    // skip it, it is handled as part of base+combining above.
+			    if (enc_utf8 && utf_iscomposing(state->c))
+			    {
+				state = state->out;
+				continue;
+			    }
+			    result = result_if_matched;
+			    break;
+			}
 		    }
 		    state = state->out;
 		}
@@ -6587,7 +6643,7 @@ nfa_regmatch(
 		    // next state is in out of the NFA_END_COLL, out1 of
 		    // START points to the END state
 		    add_state = t->state->out1->out;
-		    add_off = clen;
+		    add_off = enc_utf8 ? utfc_ptr2len(rex.input) : clen;
 		}
 		break;
 	      }

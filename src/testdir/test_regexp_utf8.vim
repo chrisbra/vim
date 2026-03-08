@@ -633,4 +633,19 @@ func Test_replace_multibyte_match_in_multi_lines()
   set ignorecase&vim re&vim
 endfun
 
+func Test_lookbehind_combining_char_in_collection()
+  " This used to crash with a NULL pointer dereference in nfa_max_width()
+  " when a look-behind assertion contained a collection with a combining char.
+  new
+  call setline(1, ['', '0', ''])
+  for i in [0, 2]
+    call cursor(1, 1)
+    exe 'set re=' .. i
+    call search('\v0[0-0\u05bb]@<!')
+    call assert_equal(2, line('.'))
+    call assert_equal(1, col('.'))
+  endfor
+  bw!
+endfunc
+
 " vim: shiftwidth=2 sts=2 expandtab
