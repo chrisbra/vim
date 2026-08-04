@@ -461,6 +461,14 @@ func Test_cmdwin_restore_heights()
   wincmd _
   let restcmds = winrestcmd()
   call feedkeys("q::set laststatus=1\<CR>:q\<CR>", 'ntx')
+  let aftercmds = winrestcmd()
+
+  " DEBUG: report the screen size and both winrestcmd() strings so a runner
+  " where this fails shows whether &columns/&lines changed during the cmdwin.
+  let ctx = printf('lines=%d columns=%d before=%s after=%s',
+        \ &lines, &columns, restcmds, aftercmds)
+  call assert_equal(restcmds, aftercmds, ctx)
+
   " As we have 2 windows, &ls = 1 should still have a statusline on the last
   " window. As such, the number of available rows hasn't changed and the window
   " sizes should be restored.
